@@ -9,12 +9,19 @@ class Categoria(models.Model):
 
 class Cliente(models.Model):
     nome = models.CharField(max_length=100)
-    cpf = models.CharField(max_length=15, unique=True)
-    telefone = models.CharField(max_length=20)
-    email = models.EmailField(max_length=100, blank=True, null=True)
+    cpf = models.CharField(max_length=15, verbose_name="C.P.F")
+    datanasc = models.DateField(verbose_name="Data de Nascimento")
+    telefone = models.CharField(max_length=20, verbose_name="Telefone")
+    email = models.EmailField(max_length=100, blank=True, null=True, verbose_name="E-mail")
 
     def __str__(self):
         return self.nome
+    
+    @property # Retorna a data de nascimento formatada como dd/mm/yyyy
+    def data_nascimento_formatada(self):
+        if self.datanasc:
+            return self.datanasc.strftime("%d/%m/%Y") 
+        return None
 
 class Produto(models.Model):
     nome = models.CharField(max_length=100)
