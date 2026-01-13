@@ -4,7 +4,7 @@
 
 {% block conteudo %}
 
-<a href='{% url 'form_produto' %}' class="btn btn-primary">Novo Produto</a>
+<a href='{% url 'form_produto' %}' class="btn btn-primary">Inserir Novo</a>
 <a href="" class="btn btn-secondary">Recarregar</a>
 
 <table style="margin-top:15px" class="table table-bordered table-hover">
@@ -12,30 +12,30 @@
         <tr>
             <th scope="col">ID</th>
             <th scope="col">Nome</th>
-            <th scope="col">Preço</th>
-            <th scope="col">Estoque</th>
+            <th scope="col">Preço (R$)</th>
             <th scope="col">Categoria</th>
-            <th scope="col">Ações</th>  
+            <th scope="col">Estoque</th>
+            <th scope="col">Ações</th>
         </tr>
     </thead>
     
     <tbody>
         {% for item in lista %}
         <tr>
-            <td>{{item.id}}</td>
-            <td>{{item.nome}}</td>
-            <td>{{item.preco}}</td>
-            <td>{{item.estoque}}</td>
-            <td>{{item.categoria}}</td>
-            <td> 
-                <a href="{% url 'detalhes_produto' item.id %}" class="btn btn-info">Detalhes</a>
-                <a href="{% url 'editar_produto' item.id %}" class="btn btn-warning">Alterar</a>
-                <a href="{% url 'excluir_produto' item.id %}" class="btn btn-danger" 
-                    onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
-            </td> 
+            <td>{{ item.id }}</td>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.preco }}</td>
+            <td>{{ item.categoria }}</td>
+            <td>{{ item.estoque }}</td>
+            <td>
+                <a href="{% url 'detalhes_produto' item.id %}" class="btn btn-info btn-sm">Detalhes</a>
+                <a href="{% url 'editar_produto' item.id %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'excluir_produto' item.id %}" class="btn btn-danger btn-sm" 
+                   onclick="return confirm('Tem certeza que deseja remover este registro?');">Remover</a>
+            </td>
         </tr>
         {% endfor %}
-     </tbody>
+    </tbody>
 </table>
 
 {% endblock %}

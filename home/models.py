@@ -10,7 +10,7 @@ class Categoria(models.Model):
 class Cliente(models.Model):
     nome = models.CharField(max_length=100)
     cpf = models.CharField(max_length=15, verbose_name="C.P.F")
-    datanasc = models.DateField(verbose_name="Data de Nascimento")
+    datanasc = models.DateField(verbose_name="Data de Nascimento", null=True, blank=True)
     telefone = models.CharField(max_length=20, verbose_name="Telefone")
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name="E-mail")
 
@@ -28,6 +28,7 @@ class Produto(models.Model):
     preco = models.DecimalField(max_digits=10, decimal_places=2)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     estoque = models.IntegerField(default=0)
+    img_base64 = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.nome

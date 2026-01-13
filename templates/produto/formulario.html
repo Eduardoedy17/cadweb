@@ -2,18 +2,85 @@
 
 {% block titulo_conteudo %} {{ titulo|default:"Cadastro de Produto" }} {% endblock %}
 
-{% block conteudo %}  
-  
-<form method="post">
-    {% csrf_token %}
+{% block conteudo %} 
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}    
     {{ form.as_p }}
     
+    <fieldset class="fieldset border p-3 rounded">
+        <label for="imagem" class="form-label">Imagem:</label>
+        
+        <input type="hidden" 
+            id="img_base64"  
+            class="img_init" 
+            data-canvas="imageCanvas" 
+            value="{{ form.instance.img_base64|default_if_none:'' }}" 
+            name="img_base64">
+
+        <input type="file" id="imagem" 
+            name="imagem" 
+            data-hidden="img_base64" 
+            class="img_upload form-control mb-3" 
+            accept="image/*"
+            {% if apenas_leitura %}disabled{% endif %}>
+        
+        <br>
+
+        <canvas class="canvas" id="imageCanvas" width="200" height="200" style="border:1px solid #ccc;"></canvas>
+        <br>
+
+    </fieldset>
+
     <div class="mt-4">
         {% if not apenas_leitura %}
             <button type="submit" class="btn btn-primary me-2">Salvar</button>
         {% endif %}
+        
         <a href="{% url 'produto' %}" class="btn btn-secondary">Voltar</a>
     </div>
 
 </form>
-{% endblock %}
+{% endblock conteudo %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function() {
+
+        // 1. Inicializa imagens já salvas (se estiver editando)
+        $('.img_init').each(function() {
+            const initialImageBase64 = $(this).val();
+            const target_canvas = $(this).data('canvas');
+            if (initialImageBase64) {
+                loadImage(initialImageBase64, target_canvas);
+            }
+        });
+        
+        // 2. Detecta nova imagem selecionada e converte para Base64
+        $('.img_upload').on('change', function(event) {
+            
+            const imagemInput = this.files[0]; // Pega o arquivo
+            var hidden = $(this).data('hidden');  // Acha o input hidden correspondente
+            
+            if (imagemInput) {
+                const reader = new FileReader();
+                reader.readAsDataURL(imagemInput); // Inicia leitura
+
+                reader.onload = function() {
+                    const imgBase64 = reader.result; // Resultado Base64
+                    
+                    // Atualiza o campo hidden com o código da imagem
+                    $('#'+hidden).val(imgBase64); 
+                    
+                    // Desenha no Canvas
+                    var canvasTarget = $('#'+hidden).data('canvas'); 
+                    loadImage(imgBase64, canvasTarget);
+                };
+
+                reader.onerror = function(error) {
+                    console.log('Erro ao converter a imagem: ', error);
+                };
+            }
+        });
+    });
+</script>
+{% endblock javascript %}
