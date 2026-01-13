@@ -4,67 +4,170 @@ from .models import *
 from .forms import *
 
 def index(request):
-    return render(request,'index.html')
+    return render(request, 'index.html')
 
+# --- CATEGORIA ---
 def categoria(request):
-    contexto = {
-        'lista': Categoria.objects.all().order_by('-id'),
-    }
-    return render(request, 'categoria/lista.html',contexto)
+    contexto = {'lista': Categoria.objects.all().order_by('-id')}
+    return render(request, 'categoria/lista.html', contexto)
 
 def form_categoria(request):
     if request.method == 'POST':
-       form = CategoriaForm(request.POST) # instancia o modelo com os dados do form
-       if form.is_valid():# faz a validação do formulário
-            categoria = form.save() # salva a instancia do modelo no banco de dados
+        form = CategoriaForm(request.POST)
+        if form.is_valid():
+            form.save()
             messages.success(request, 'Registro salvo com sucesso!')
-            return redirect('categoria') # redireciona para a listagem
-    else:# método é get, novo registro
-        form = CategoriaForm() # formulário vazio
-    contexto = {
-        'form':form,
-    }
+            return redirect('categoria')
+    else:
+        form = CategoriaForm()
+    contexto = {'form': form}
     return render(request, 'categoria/formulario.html', contexto)
 
 def detalhes_categoria(request, id):
     categoria = get_object_or_404(Categoria, pk=id)
-    
-    # Instancia o formulário com o objeto
     form = CategoriaForm(instance=categoria)
-    
-    # Bloqueia todos os campos
     for field in form.fields.values():
         field.widget.attrs['disabled'] = 'disabled'
-
-    contexto = {
-        'form': form,
-        'titulo': 'Detalhes da Categoria',  # Título personalizado
-        'apenas_leitura': True  # Flag para esconder o botão Salvar
-    }
+    contexto = {'form': form, 'titulo': 'Detalhes da Categoria', 'apenas_leitura': True}
     return render(request, 'categoria/formulario.html', contexto)
 
 def editar_categoria(request, id):
-    try:
-        categoria = Categoria.objects.get(pk=id)
-    except Categoria.DoesNotExist:
-        # Caso o registro não seja encontrado, exibe a mensagem de erro
-        messages.error(request, 'Registro não encontrado')
-        return redirect('categoria')  # Redireciona para a listagem
-     
+    categoria = get_object_or_404(Categoria, pk=id)
     if request.method == 'POST':
-        # combina os dados do formulário submetido com a instância do objeto existente, permitindo editar seus valores.
         form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
-            categoria = form.save() # save retorna o objeto salvo
+            form.save()
             messages.success(request, 'Operação realizada com Sucesso')
-            return redirect('categoria') # redireciona para a listagem
+            return redirect('categoria')
     else:
-         form = CategoriaForm(instance=categoria)
-    return render(request, 'categoria/formulario.html', {'form': form,})
-
+        form = CategoriaForm(instance=categoria)
+    return render(request, 'categoria/formulario.html', {'form': form})
 
 def excluir_categoria(request, id):
     categoria = get_object_or_404(Categoria, pk=id)
     categoria.delete()
     messages.success(request, 'Registro excluído com sucesso!')
     return redirect('categoria')
+
+# --- PRODUTO ---
+def produto(request):
+    contexto = {'lista': Produto.objects.all().order_by('-id')}
+    return render(request, 'produto/lista.html', contexto)
+
+def form_produto(request):
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Produto salvo com sucesso!')
+            return redirect('produto')
+    else:
+        form = ProdutoForm()
+    return render(request, 'produto/formulario.html', {'form': form, 'titulo': 'Cadastro de Produto'})
+
+def detalhes_produto(request, id):
+    item = get_object_or_404(Produto, pk=id)
+    form = ProdutoForm(instance=item)
+    for field in form.fields.values():
+        field.widget.attrs['disabled'] = 'disabled'
+    return render(request, 'produto/formulario.html', {'form': form, 'titulo': 'Detalhes do Produto', 'apenas_leitura': True})
+
+def editar_produto(request, id):
+    item = get_object_or_404(Produto, pk=id)
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Produto atualizado!')
+            return redirect('produto')
+    else:
+        form = ProdutoForm(instance=item)
+    return render(request, 'produto/formulario.html', {'form': form, 'titulo': 'Editar Produto'})
+
+def excluir_produto(request, id):
+    item = get_object_or_404(Produto, pk=id)
+    item.delete()
+    messages.success(request, 'Produto excluído!')
+    return redirect('produto')
+
+# --- CLIENTE ---
+def cliente(request):
+    contexto = {'lista': Cliente.objects.all().order_by('nome')}
+    return render(request, 'cliente/lista.html', contexto)
+
+def form_cliente(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cliente salvo com sucesso!')
+            return redirect('cliente')
+    else:
+        form = ClienteForm()
+    return render(request, 'cliente/formulario.html', {'form': form, 'titulo': 'Cadastro de Cliente'})
+
+def detalhes_cliente(request, id):
+    item = get_object_or_404(Cliente, pk=id)
+    form = ClienteForm(instance=item)
+    for field in form.fields.values():
+        field.widget.attrs['disabled'] = 'disabled'
+    return render(request, 'cliente/formulario.html', {'form': form, 'titulo': 'Detalhes do Cliente', 'apenas_leitura': True})
+
+def editar_cliente(request, id):
+    item = get_object_or_404(Cliente, pk=id)
+    if request.method == 'POST':
+        form = ClienteForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cliente atualizado!')
+            return redirect('cliente')
+    else:
+        form = ClienteForm(instance=item)
+    return render(request, 'cliente/formulario.html', {'form': form, 'titulo': 'Editar Cliente'})
+
+def excluir_cliente(request, id):
+    item = get_object_or_404(Cliente, pk=id)
+    item.delete()
+    messages.success(request, 'Cliente excluído!')
+    return redirect('cliente')
+
+# --- PEDIDO ---
+def pedido(request):
+    contexto = {'lista': Pedido.objects.all().order_by('-id')}
+    return render(request, 'pedido/lista.html', contexto)
+
+def form_pedido(request):
+    if request.method == 'POST':
+        form = PedidoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pedido salvo com sucesso!')
+            return redirect('pedido')
+    else:
+        form = PedidoForm()
+    return render(request, 'pedido/formulario.html', {'form': form, 'titulo': 'Cadastro de Pedido'})
+
+def detalhes_pedido(request, id):
+    item = get_object_or_404(Pedido, pk=id)
+    form = PedidoForm(instance=item)
+    for field in form.fields.values():
+        field.widget.attrs['disabled'] = 'disabled'
+    return render(request, 'pedido/formulario.html', {'form': form, 'titulo': 'Detalhes do Pedido', 'apenas_leitura': True})
+
+def editar_pedido(request, id):
+    item = get_object_or_404(Pedido, pk=id)
+    if request.method == 'POST':
+        form = PedidoForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pedido atualizado!')
+            return redirect('pedido')
+    else:
+        form = PedidoForm(instance=item)
+    return render(request, 'pedido/formulario.html', {'form': form, 'titulo': 'Editar Pedido'})
+
+def excluir_pedido(request, id):
+    item = get_object_or_404(Pedido, pk=id)
+    item.delete()
+    messages.success(request, 'Pedido excluído!')
+    return redirect('pedido')

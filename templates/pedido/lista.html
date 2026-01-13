@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block titulo_conteudo %} Listagem de Pedidos {% endblock %}
+
+{% block conteudo %}
+
+<a href='{% url 'form_pedido' %}' class="btn btn-primary">Novo Pedido</a>
+
+<table style="margin-top:15px" class="table table-bordered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Data</th>
+            <th scope="col">Status</th>
+            <th scope="col">Ações</th>  
+        </tr>
+    </thead>
+    
+    <tbody>
+        {% for item in lista %}
+        <tr>
+            <td>{{item.id}}</td>
+            <td>{{item.cliente}}</td>
+            <td>{{item.data_pedido|date:"d/m/Y H:i"}}</td>
+            <td>{{item.get_status_display}}</td>
+            <td> 
+                <a href="{% url 'detalhes_pedido' item.id %}" class="btn btn-info">Detalhes</a>
+                <a href="{% url 'editar_pedido' item.id %}" class="btn btn-warning">Alterar</a>
+                <a href="{% url 'excluir_pedido' item.id %}" class="btn btn-danger" 
+                    onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
+            </td> 
+        </tr>
+        {% endfor %}
+     </tbody>
+</table>
+
+{% endblock %}

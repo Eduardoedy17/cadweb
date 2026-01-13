@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block titulo_conteudo %} Listagem de Clientes {% endblock %}
+
+{% block conteudo %}
+
+<a href='{% url 'form_cliente' %}' class="btn btn-primary">Novo Cliente</a>
+
+<table style="margin-top:15px" class="table table-bordered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">CPF</th>
+            <th scope="col">Telefone</th>
+            <th scope="col">Email</th>
+            <th scope="col">Ações</th>  
+        </tr>
+    </thead>
+    
+    <tbody>
+        {% for item in lista %}
+        <tr>
+            <td>{{item.nome}}</td>
+            <td>{{item.cpf}}</td>
+            <td>{{item.telefone}}</td>
+            <td>{{item.email}}</td>
+            <td> 
+                <a href="{% url 'detalhes_cliente' item.id %}" class="btn btn-info">Detalhes</a>
+                <a href="{% url 'editar_cliente' item.id %}" class="btn btn-warning">Alterar</a>
+                <a href="{% url 'excluir_cliente' item.id %}" class="btn btn-danger" 
+                    onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
+            </td> 
+        </tr>
+        {% endfor %}
+     </tbody>
+</table>
+
+{% endblock %}
