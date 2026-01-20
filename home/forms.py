@@ -2,8 +2,6 @@ from django import forms
 from datetime import date
 from .models import *
 
-# ... (Mantenha CategoriaForm, ClienteForm, ProdutoForm, EstoqueForm como estavam) ...
-
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
@@ -68,11 +66,20 @@ class EstoqueForm(forms.ModelForm):
             'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
         }
 
-# --- FORM DO PEDIDO (Estritamente conforme Prompt) ---
 class PedidoForm(forms.ModelForm):
     class Meta:
         model = Pedido
         fields = ['cliente']
         widgets = {
-            'cliente': forms.HiddenInput(),  # Campo oculto para armazenar o ID
+            'cliente': forms.HiddenInput(),
+        }
+
+# --- NOVO FORM (Slide 17) ---
+class ItemPedidoForm(forms.ModelForm):
+    class Meta:
+        model = ItemPedido
+        fields = ['produto', 'qtde']
+        widgets = {
+            'produto': forms.Select(attrs={'class': 'form-control'}),
+            'qtde': forms.TextInput(attrs={'class': 'inteiro form-control', 'placeholder': 'Qtde'}),
         }

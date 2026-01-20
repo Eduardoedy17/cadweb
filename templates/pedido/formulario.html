@@ -4,33 +4,30 @@
 
 {% block conteudo %} 
 
+<div class="card p-3">
+    <form method="post">
+        {% csrf_token %}    
 
-<form method="post">
-    {% csrf_token %}    
+        <p>
+          <label>Cliente:</label>
+          <span class="form-control bg-light">{{ form.instance.cliente.nome }}</span>
+        </p>
 
-    <p>
-      <label for="id_cliene">Cliente:</label>
-      <span class="form-control" >{{form.instance.cliente.nome}}</span>
-  
-    </p>
-    <p>
-      <label for="id_data">Data:</label>
-      <span class="form-control" >{{ data_atual|date:"d/m/Y H:i" }}</span>
-     </p>
-  
-    <p>
-      <label for="id_status">Status:</label>
-      <span class="form-control" >{{form.instance.get_status_display}}</span>
-     </p>    
+        <p>
+          <label>Data:</label>
+          <span class="form-control bg-light">{{ data_atual|date:"d/m/Y H:i" }}</span>
+        </p>
+      
+        <p>
+          <label>Status:</label>
+          <span class="form-control bg-light">{{ form.instance.get_status_display }}</span>
+        </p>    
 
-    {{ form.as_p }}
-    
-    <button class="btn btn-primary btn-sm" type="submit">Salvar</button>
-</form>
-
+        {{ form.as_p }}
+        
+        <button class="btn btn-primary btn-sm" type="submit">Salvar</button>
+        <a href="{% url 'cliente' %}" class="btn btn-secondary btn-sm">Cancelar</a>
+    </form>
+</div>
 
 {% endblock conteudo %}
-
-{% block javascript %}
-
-{% endblock javascript %}

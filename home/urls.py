@@ -31,7 +31,14 @@ urlpatterns = [
     path('cliente/editar/<int:id>/', views.editar_cliente, name="editar_cliente"),
     path('cliente/excluir/<int:id>/', views.excluir_cliente, name="excluir_cliente"),
 
-    # --- PEDIDO (Estritamente conforme Prompt) ---
+    # --- PEDIDO ---
     path('pedido/', views.pedido, name='pedido'),
     path('pedido/form/<int:id>', views.novo_pedido, name='novo_pedido'),
+    
+    # NOVAS ROTAS (Slide 17)
+    path('pedido/detalhes/<int:id>', views.detalhes_pedido, name='detalhes_pedido'),
+    path('pedido/remover_item/<int:id>', views.remover_item_pedido, name='remover_item_pedido'),
+    
+    # CORREÇÃO: Adicionada a rota que faltava para excluir pedido
+    path('pedido/excluir/<int:id>', views.excluir_pedido, name='excluir_pedido'),
 ]

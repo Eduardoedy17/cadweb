@@ -5,7 +5,6 @@ from django.apps import apps
 from .models import *
 from .forms import *
 
-# --- HOME ---
 def index(request):
     return render(request, 'index.html')
 
@@ -170,25 +169,28 @@ def excluir_cliente(request, id):
     messages.success(request, 'Cliente excluído!')
     return redirect('cliente')
 
-# --- PEDIDO (Conforme Instruções) ---
+# --- PEDIDO ---
 
 def pedido(request):
-    lista = Pedido.objects.all().order_by('-id')  # Obtém todos os registros
+    lista = Pedido.objects.all().order_by('-id')
     return render(request, 'pedido/lista.html', {'lista': lista})
 
-def novo_pedido(request,id):
+def novo_pedido(request, id):
     if request.method == 'GET':
         try:
             cliente = Cliente.objects.get(pk=id)
+        # O ERRO ESTAVA AQUI: Faltava o bloco except abaixo do try
         except Cliente.DoesNotExist:
-            # Caso o registro não seja encontrado, exibe a mensagem de erro
             messages.error(request, 'Registro não encontrado')
-            return redirect('cliente')  # Redireciona para a listagem
-        # cria um novo pedido com o cliente selecionado
+            return redirect('cliente')
+        
         pedido = Pedido(cliente=cliente)
-        form = PedidoForm(instance=pedido)# cria um formulario com o novo pedido
-        return render(request, 'pedido/formulario.html',{'form': form,})
-    else: # se for metodo post, salva o pedido.
+        form = PedidoForm(instance=pedido)
+        
+        # Apontando para o arquivo correto: 'pedido/formulario.html'
+        return render(request, 'pedido/formulario.html', {'form': form})
+        
+    else:
         form = PedidoForm(request.POST)
         if form.is_valid():
             pedido = form.save()
@@ -204,6 +206,7 @@ def editar_pedido(request, id):
             return redirect('pedido')
     else:
         form = PedidoForm(instance=item)
+    
     return render(request, 'pedido/formulario.html', {'form': form})
 
 def excluir_pedido(request, id):
@@ -211,3 +214,32 @@ def excluir_pedido(request, id):
     item.delete()
     messages.success(request, 'Pedido excluído!')
     return redirect('pedido')
+
+# --- DETALHES DO PEDIDO ---
+def detalhes_pedido(request, id):
+    pedido = get_object_or_404(Pedido, pk=id)
+    
+    if request.method == 'POST':
+        form = ItemPedidoForm(request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.pedido = pedido
+            item.preco = item.produto.preco
+            item.save()
+            messages.success(request, 'Item adicionado com sucesso!')
+            return redirect('detalhes_pedido', id=id)
+    else:
+        form = ItemPedidoForm()
+    
+    contexto = {
+        'pedido': pedido,
+        'form': form,
+    }
+    return render(request, 'pedido/detalhes.html', contexto)
+
+def remover_item_pedido(request, id):
+    item = get_object_or_404(ItemPedido, pk=id)
+    pedido_id = item.pedido.id
+    item.delete()
+    messages.success(request, 'Item removido com sucesso!')
+    return redirect('detalhes_pedido', id=pedido_id)
