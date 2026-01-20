@@ -171,3 +171,17 @@ def excluir_pedido(request, id):
     item.delete()
     messages.success(request, 'Pedido excluído!')
     return redirect('pedido')
+
+def ajustar_estoque(request, id):
+    produto = produto = Produto.objects.get(pk=id)
+    estoque = produto.estoque # pega o objeto estoque relacionado ao produto
+    if request.method == 'POST':
+        form = EstoqueForm(request.POST, instance=estoque)
+        if form.is_valid():
+            estoque = form.save()
+            lista = []
+            lista.append(estoque.produto) 
+            return render(request, 'produto/lista.html', {'lista': lista})
+    else:
+         form = EstoqueForm(instance=estoque)
+    return render(request, 'produto/estoque.html', {'form': form,})

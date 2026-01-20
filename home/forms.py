@@ -48,16 +48,20 @@ class ClienteForm(forms.ModelForm):
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        fields = ['nome', 'preco', 'categoria', 'estoque', 'img_base64']
+        # Remova 'estoque' desta lista
+        fields = ['nome', 'preco', 'categoria', 'img_base64'] 
         widgets = {
             'categoria': forms.Select(attrs={'class': 'form-control'}),
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do Produto'}),
             'preco': forms.TextInput(attrs={'class': 'money form-control', 'maxlength': '500', 'placeholder': '0.000,00'}),
-            'estoque': forms.NumberInput(attrs={'class': 'inteiro form-control', 'placeholder': 'Quantidade em Estoque'}),
+            # Remova a linha do 'estoque' aqui também
             'img_base64': forms.HiddenInput(),
-            # a classe money é usada para aplicar a máscara de monetário, está em base.html
-            # jQuery Mask Plugin
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ProdutoForm, self).__init__(*args, **kwargs)
+        self.fields['preco'].localize = True
+        self.fields['preco'].widget.is_localized = True
 
     def __init__(self, *args, **kwargs):
         super(ProdutoForm, self).__init__(*args, **kwargs)
@@ -73,3 +77,13 @@ class PedidoForm(forms.ModelForm):
             'produtos': forms.SelectMultiple(attrs={'class': 'form-control', 'style': 'height: 150px;'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
+
+class EstoqueForm(forms.ModelForm):
+    class Meta:
+        model = Estoque
+        fields = ['produto','qtde']
+        
+        widgets = {
+            'produto': forms.HiddenInput(),  # Campo oculto para armazenar o ID do produto
+            'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
+    }

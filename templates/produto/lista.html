@@ -11,7 +11,7 @@
     <thead class="thead-dark">
         <tr>
             <th scope="col">ID</th>
-            <th scope="col">Nome</th>
+            <th scope="col">Imagem</th> <th scope="col">Nome</th>
             <th scope="col">Preço (R$)</th>
             <th scope="col">Categoria</th>
             <th scope="col">Estoque</th>
@@ -23,6 +23,15 @@
         {% for item in lista %}
         <tr>
             <td>{{ item.id }}</td>
+            
+            <td class="text-center">
+                {% if item.img_base64 %}
+                    <img src="{{ item.img_base64 }}" style="max-width: 50px; max-height: 50px;" alt="Produto">
+                {% else %}
+                    <span class="text-muted"><i class="fas fa-image"></i></span>
+                {% endif %}
+            </td>
+
             <td>{{ item.nome }}</td>
             <td>{{ item.preco }}</td>
             <td>{{ item.categoria }}</td>
