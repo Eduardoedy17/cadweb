@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name="index"),
     
-    # Autocomplete e Testes
+    # Autocomplete / Testes
     path('buscar_dados/<str:app_modelo>/', views.buscar_dados, name='buscar_dados'),
     path('teste1/', views.teste1, name='teste1'),
     path('teste2/', views.teste2, name='teste2'),
@@ -31,10 +31,7 @@ urlpatterns = [
     path('cliente/editar/<int:id>/', views.editar_cliente, name="editar_cliente"),
     path('cliente/excluir/<int:id>/', views.excluir_cliente, name="excluir_cliente"),
 
-    # Pedido
-    path('pedido/', views.pedido, name="pedido"),
-    # Rota nova: Recebe o ID do Cliente para iniciar o pedido (Slide 193)
-    path('pedido/novo/<int:id>/', views.novo_pedido, name="novo_pedido"),
-    path('pedido/editar/<int:id>/', views.editar_pedido, name="editar_pedido"),
-    path('pedido/excluir/<int:id>/', views.excluir_pedido, name="excluir_pedido"),
+    # --- PEDIDO (Estritamente conforme Prompt) ---
+    path('pedido/', views.pedido, name='pedido'),
+    path('pedido/form/<int:id>', views.novo_pedido, name='novo_pedido'),
 ]

@@ -44,7 +44,7 @@ class Estoque(models.Model):
     def __str__(self):
         return f'{self.produto.nome} - Quantidade: {self.qtde}'
 
-# --- MODELOS DO PEDIDO (Slides 16 em diante) ---
+# --- MODELOS DO PEDIDO (Estritamente conforme Slide/Prompt) ---
 
 class Pedido(models.Model):
     NOVO = 1
@@ -60,20 +60,19 @@ class Pedido(models.Model):
     ]
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    # Relacionamento ManyToMany usando tabela intermediária ItemPedido
     produtos = models.ManyToManyField(Produto, through='ItemPedido')
     data_pedido = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=NOVO)
 
     def __str__(self):
-        return f"Pedido {self.id} - {self.cliente.nome}"
-    
+        # Formatação exata solicitada
+        return f"Pedido {self.id} - Cliente: {self.cliente.nome} - Status: {self.get_status_display()}"
+
     @property
     def data_pedidof(self):
-        """Retorna a data no formato DD/MM/AAAA HH:MM"""
         if self.data_pedido:
             return self.data_pedido.strftime('%d/%m/%Y %H:%M')
-        return None
+        return None 
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
@@ -82,4 +81,4 @@ class ItemPedido(models.Model):
     preco = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.produto.nome} (Qtd: {self.qtde}) - Preço: {self.preco}"
+        return f"{self.produto.nome} (Qtd: {self.qtde}) - Preço Unitário: {self.preco}"

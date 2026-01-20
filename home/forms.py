@@ -2,6 +2,8 @@ from django import forms
 from datetime import date
 from .models import *
 
+# ... (Mantenha CategoriaForm, ClienteForm, ProdutoForm, EstoqueForm como estavam) ...
+
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
@@ -57,15 +59,6 @@ class ProdutoForm(forms.ModelForm):
         self.fields['preco'].localize = True
         self.fields['preco'].widget.is_localized = True
 
-# Form do Slide 303 (Pedido apenas com Cliente Oculto)
-class PedidoForm(forms.ModelForm):
-    class Meta:
-        model = Pedido
-        fields = ['cliente']
-        widgets = {
-            'cliente': forms.HiddenInput(),
-        }
-
 class EstoqueForm(forms.ModelForm):
     class Meta:
         model = Estoque
@@ -73,4 +66,13 @@ class EstoqueForm(forms.ModelForm):
         widgets = {
             'produto': forms.HiddenInput(),
             'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
+        }
+
+# --- FORM DO PEDIDO (Estritamente conforme Prompt) ---
+class PedidoForm(forms.ModelForm):
+    class Meta:
+        model = Pedido
+        fields = ['cliente']
+        widgets = {
+            'cliente': forms.HiddenInput(),  # Campo oculto para armazenar o ID
         }
