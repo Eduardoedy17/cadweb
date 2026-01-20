@@ -19,21 +19,24 @@
     </thead>
     
     <tbody>
-        {% for item in lista %}
-        <tr>
-            <td>{{item.nome}}</td>
-            <td>{{item.cpf}}</td>
-            <td>{{item.telefone}}</td>
-            <td>{{item.email}}</td>
-            <td> 
-                <a href="{% url 'detalhes_cliente' item.id %}" class="btn btn-info">Detalhes</a>
-                <a href="{% url 'editar_cliente' item.id %}" class="btn btn-warning">Alterar</a>
-                <a href="{% url 'excluir_cliente' item.id %}" class="btn btn-danger" 
-                    onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
-            </td> 
-        </tr>
-        {% endfor %}
-     </tbody>
+    {% for item in lista %}
+    <tr>
+        <td>{{ item.id }}</td>
+        <td>{{ item.nome }}</td>
+        <td>{{ item.cpf }}</td>
+        <td>{{ item.data_nascimento_formatada }}</td>
+        <td>
+            <a href="{% url 'novo_pedido' item.id %}" class="btn btn-primary btn-sm">
+               Novo Pedido
+            </a>
+            
+            <a href="{% url 'editar_cliente' item.id %}" class="btn btn-warning btn-sm">Editar</a>
+            <a href="{% url 'excluir_cliente' item.id %}" class="btn btn-danger btn-sm" 
+               onclick="return confirm('Tem certeza?');">Remover</a>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
 </table>
 
 {% endblock %}

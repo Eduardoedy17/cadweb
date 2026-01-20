@@ -176,23 +176,30 @@ def pedido(request):
     lista = Pedido.objects.all().order_by('-id')
     return render(request, 'pedido/lista.html', {'lista': lista})
 
+# ... imports ...
+
 def novo_pedido(request, id):
-    """Cria um pedido associado a um cliente (Slide 193)"""
+    """
+    Recebe o ID do cliente vindo da lista de clientes.
+    Cria um formulário de pedido já vinculado a este cliente.
+    """
     if request.method == 'GET':
         try:
             cliente = Cliente.objects.get(pk=id)
         except Cliente.DoesNotExist:
-            messages.error(request, 'Registro não encontrado')
+            messages.error(request, 'Cliente não encontrado')
             return redirect('cliente')
-        
+
         # Cria instância com o cliente
         pedido = Pedido(cliente=cliente)
         form = PedidoForm(instance=pedido)
-        return render(request, 'pedido/form.html', {'form': form})
-    else:
+        
+        return render(request, 'pedido/formulario.html', {'form': form})
+        
+    else: # POST
         form = PedidoForm(request.POST)
         if form.is_valid():
-            pedido = form.save()
+            form.save()
             return redirect('pedido')
 
 def editar_pedido(request, id):

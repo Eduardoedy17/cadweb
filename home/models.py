@@ -32,7 +32,6 @@ class Produto(models.Model):
     def __str__(self):
         return self.nome
 
-    # Propriedade para acessar o estoque relacionado
     @property
     def estoque(self):
         estoque_item, flag_created = Estoque.objects.get_or_create(produto=self, defaults={'qtde': 0})
@@ -45,16 +44,14 @@ class Estoque(models.Model):
     def __str__(self):
         return f'{self.produto.nome} - Quantidade: {self.qtde}'
 
-# --- MODELOS DO PEDIDO (Slide 16 e seguintes) ---
+# --- MODELOS DO PEDIDO (Slides 16 em diante) ---
 
 class Pedido(models.Model):
-    # Constantes para os status
     NOVO = 1
     EM_ANDAMENTO = 2
     CONCLUIDO = 3
     CANCELADO = 4
 
-    # Choices para o campo status
     STATUS_CHOICES = [
         (NOVO, 'Novo'),
         (EM_ANDAMENTO, 'Em Andamento'),
@@ -63,7 +60,7 @@ class Pedido(models.Model):
     ]
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    # Relacionamento ManyToMany através de ItemPedido
+    # Relacionamento ManyToMany usando tabela intermediária ItemPedido
     produtos = models.ManyToManyField(Produto, through='ItemPedido')
     data_pedido = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=NOVO)
@@ -71,7 +68,6 @@ class Pedido(models.Model):
     def __str__(self):
         return f"Pedido {self.id} - {self.cliente.nome}"
     
-    # Propriedade formatar a data (Slide 175)
     @property
     def data_pedidof(self):
         """Retorna a data no formato DD/MM/AAAA HH:MM"""
@@ -80,7 +76,6 @@ class Pedido(models.Model):
         return None
 
 class ItemPedido(models.Model):
-    # Tabela intermediária explícita (Slide 177)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     qtde = models.PositiveIntegerField()
