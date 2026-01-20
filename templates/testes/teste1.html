@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block titulo_conteudo %} Teste Autocomplete Estático {% endblock %}
+
+{% block conteudo %}
+<div class="card p-3">
+    <h5>Isso é um teste</h5>
+    
+    <p>
+        <label for="estado">Digite um Estado (Por ID):</label>
+        <input type="text" id="estado" class="form-control">
+    </p>
+
+    <p>
+        <label for="estado2">Digite outro Estado (Por Classe):</label>
+        <input type="text" class="form-control autocomplete-estatico">
+    </p>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function() {
+        // Lista de estados (Slide 184)
+        const estados = [
+            "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará",
+            "Distrito Federal", "Espírito Santo", "Goiás", "Maranhão",
+            "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará",
+            "Paraíba", "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro",
+            "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", "Roraima",
+            "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
+        ];
+
+        // Ativando por ID (Slide 178)
+        $("#estado").autocomplete({
+            source: estados
+        });
+
+        // Ativando por Classe (Slide 180) - Usei um nome de classe diferente para não conflitar com a função genérica
+        $(".autocomplete-estatico").autocomplete({
+            source: estados
+        });
+    });
+</script>
+{% endblock %}

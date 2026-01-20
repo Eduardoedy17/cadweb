@@ -4,6 +4,11 @@ from . import views
 urlpatterns = [
     path('', views.index, name="index"),
     
+    # --- Autocomplete & Testes ---
+    path('buscar_dados/<str:app_modelo>/', views.buscar_dados, name='buscar_dados'), # Slide 211
+    path('teste1/', views.teste1, name='teste1'), # Slide 174
+    path('teste2/', views.teste2, name='teste2'), # Slide 227
+
     # --- Categoria ---
     path('categoria/', views.categoria, name="categoria"),
     path('categoria/form/', views.form_categoria, name="form_categoria"),
@@ -17,7 +22,7 @@ urlpatterns = [
     path('produto/detalhes/<int:id>/', views.detalhes_produto, name="detalhes_produto"),
     path('produto/editar/<int:id>/', views.editar_produto, name="editar_produto"),
     path('produto/excluir/<int:id>/', views.excluir_produto, name="excluir_produto"),
-    path('produto/ajustar_estoque/<int:id>/', views.ajustar_estoque, name="ajustar_estoque"),
+    path('produto/ajustar_estoque/<int:id>/', views.ajustar_estoque, name='ajustar_estoque'),
 
     # --- Cliente ---
     path('cliente/', views.cliente, name="cliente"),

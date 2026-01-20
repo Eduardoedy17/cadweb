@@ -10,7 +10,7 @@ class CategoriaForm(forms.ModelForm):
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
             'ordem': forms.NumberInput(attrs={'class': 'inteiro form-control', 'placeholder': ''}),
         }
-
+    
     def clean_nome(self):
         nome = self.cleaned_data.get('nome')
         if len(nome) < 3:
@@ -30,38 +30,28 @@ class ClienteForm(forms.ModelForm):
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome Completo'}),
             'cpf': forms.TextInput(attrs={'class': 'cpf form-control', 'placeholder': '000.000.000-00'}),
-            'datanasc': forms.DateInput(attrs={'class': 'data form-control', 'placeholder': 'dd/mm/aaaa'}), # Máscara de data
+            'datanasc': forms.DateInput(attrs={'class': 'data form-control', 'placeholder': 'dd/mm/aaaa'}),
             'telefone': forms.TextInput(attrs={'class': 'telefone form-control', 'placeholder': '(00) 00000-0000'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
         }
 
-    # --- Validação da Data de Nascimento ---
     def clean_datanasc(self):
         datanasc = self.cleaned_data.get('datanasc')
-        
-        # Verifica se o campo não está vazio e se é maior que hoje
         if datanasc and datanasc > date.today():
             raise forms.ValidationError("A data de nascimento não pode ser maior que a data atual.")
-            
         return datanasc
 
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        # Remova 'estoque' desta lista
-        fields = ['nome', 'preco', 'categoria', 'img_base64'] 
+        fields = ['nome', 'preco', 'categoria', 'img_base64']
         widgets = {
-            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            # Alteração Slide 220: Categoria vira HiddenInput
+            'categoria': forms.HiddenInput(), 
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do Produto'}),
             'preco': forms.TextInput(attrs={'class': 'money form-control', 'maxlength': '500', 'placeholder': '0.000,00'}),
-            # Remova a linha do 'estoque' aqui também
             'img_base64': forms.HiddenInput(),
         }
-
-    def __init__(self, *args, **kwargs):
-        super(ProdutoForm, self).__init__(*args, **kwargs)
-        self.fields['preco'].localize = True
-        self.fields['preco'].widget.is_localized = True
 
     def __init__(self, *args, **kwargs):
         super(ProdutoForm, self).__init__(*args, **kwargs)
@@ -82,8 +72,7 @@ class EstoqueForm(forms.ModelForm):
     class Meta:
         model = Estoque
         fields = ['produto','qtde']
-        
         widgets = {
-            'produto': forms.HiddenInput(),  # Campo oculto para armazenar o ID do produto
+            'produto': forms.HiddenInput(),
             'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
-    }
+        }

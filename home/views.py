@@ -1,10 +1,40 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
+from django.http import JsonResponse # Importação Slide 203
+from django.apps import apps # Importação Slide 205
 from .models import *
 from .forms import *
 
 def index(request):
     return render(request, 'index.html')
+
+# --- AUTCOMPLETE / TESTES ---
+
+# Slide 208: View Genérica para Autocomplete
+def buscar_dados(request, app_modelo):
+    termo = request.GET.get('q', '') # pega o termo digitado
+    try:
+        # Divida o app e o modelo
+        app, modelo = app_modelo.split('.')
+        modelo = apps.get_model(app, modelo)
+    except LookupError:
+        return JsonResponse({'error': 'Modelo não encontrado'}, status=404)
+    
+    # Verifica se o modelo possui os campos 'nome' e 'id'
+    if not hasattr(modelo, 'nome') or not hasattr(modelo, 'id'):
+        return JsonResponse({'error': 'Modelo deve ter campos "id" e "nome"'}, status=400)
+    
+    resultados = modelo.objects.filter(nome__icontains=termo)
+    dados = [{'id': obj.id, 'nome': obj.nome} for obj in resultados]
+    return JsonResponse(dados, safe=False)
+
+# Slide 174: View de Teste 1
+def teste1(request):
+    return render(request, 'testes/teste1.html')
+
+# Slide 226: View de Teste 2
+def teste2(request):
+    return render(request, 'testes/teste2.html')
 
 # --- CATEGORIA ---
 def categoria(request):
@@ -90,6 +120,20 @@ def excluir_produto(request, id):
     messages.success(request, 'Produto excluído!')
     return redirect('produto')
 
+def ajustar_estoque(request, id):
+    produto = Produto.objects.get(pk=id)
+    estoque = produto.estoque 
+    if request.method == 'POST':
+        form = EstoqueForm(request.POST, instance=estoque)
+        if form.is_valid():
+            estoque = form.save()
+            lista = []
+            lista.append(estoque.produto)
+            return render(request, 'produto/lista.html', {'lista': lista})
+    else:
+         form = EstoqueForm(instance=estoque)
+    return render(request, 'produto/estoque.html', {'form': form,})
+
 # --- CLIENTE ---
 def cliente(request):
     contexto = {'lista': Cliente.objects.all().order_by('nome')}
@@ -171,17 +215,3 @@ def excluir_pedido(request, id):
     item.delete()
     messages.success(request, 'Pedido excluído!')
     return redirect('pedido')
-
-def ajustar_estoque(request, id):
-    produto = produto = Produto.objects.get(pk=id)
-    estoque = produto.estoque # pega o objeto estoque relacionado ao produto
-    if request.method == 'POST':
-        form = EstoqueForm(request.POST, instance=estoque)
-        if form.is_valid():
-            estoque = form.save()
-            lista = []
-            lista.append(estoque.produto) 
-            return render(request, 'produto/lista.html', {'lista': lista})
-    else:
-         form = EstoqueForm(instance=estoque)
-    return render(request, 'produto/estoque.html', {'form': form,})
