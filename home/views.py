@@ -179,17 +179,13 @@ def novo_pedido(request, id):
     if request.method == 'GET':
         try:
             cliente = Cliente.objects.get(pk=id)
-        # O ERRO ESTAVA AQUI: Faltava o bloco except abaixo do try
         except Cliente.DoesNotExist:
             messages.error(request, 'Registro não encontrado')
             return redirect('cliente')
         
         pedido = Pedido(cliente=cliente)
         form = PedidoForm(instance=pedido)
-        
-        # Apontando para o arquivo correto: 'pedido/formulario.html'
         return render(request, 'pedido/formulario.html', {'form': form})
-        
     else:
         form = PedidoForm(request.POST)
         if form.is_valid():
@@ -206,7 +202,6 @@ def editar_pedido(request, id):
             return redirect('pedido')
     else:
         form = PedidoForm(instance=item)
-    
     return render(request, 'pedido/formulario.html', {'form': form})
 
 def excluir_pedido(request, id):
@@ -216,6 +211,7 @@ def excluir_pedido(request, id):
     return redirect('pedido')
 
 # --- DETALHES DO PEDIDO ---
+
 def detalhes_pedido(request, id):
     pedido = get_object_or_404(Pedido, pk=id)
     
