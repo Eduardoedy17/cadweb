@@ -4,7 +4,6 @@
 
 {% block conteudo %}
 
-<a href='{% url 'form_pedido' %}' class="btn btn-primary">Novo Pedido</a>
 <a href="" class="btn btn-secondary">Recarregar</a>
 
 <table style="margin-top:15px" class="table table-bordered table-hover">
@@ -13,27 +12,28 @@
             <th scope="col">ID</th>
             <th scope="col">Cliente</th>
             <th scope="col">Data</th>
-            <th scope="col">Status</th>
-            <th scope="col">Ações</th>  
+            <th scope="col">Situação</th>
+            <th scope="col">Produtos</th>
+            <th scope="col">Total (R$)</th>
+            <th scope="col">Ações</th>
         </tr>
     </thead>
-    
     <tbody>
-        {% for item in lista %}
+        {% for pedido in lista %}
         <tr>
-            <td>{{item.id}}</td>
-            <td>{{item.cliente}}</td>
-            <td>{{item.data_pedido|date:"d/m/Y H:i"}}</td>
-            <td>{{item.get_status_display}}</td>
-            <td> 
-                <a href="{% url 'detalhes_pedido' item.id %}" class="btn btn-info">Detalhes</a>
-                <a href="{% url 'editar_pedido' item.id %}" class="btn btn-warning">Alterar</a>
-                <a href="{% url 'excluir_pedido' item.id %}" class="btn btn-danger" 
-                    onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
-            </td> 
+            <td>{{ pedido.id }}</td>
+            <td>{{ pedido.cliente.nome }}</td>
+            <td>{{ pedido.data_pedidof }}</td>
+            <td>{{ pedido.get_status_display }}</td>
+            <td>?</td>
+            <td>?</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-sm">Detalhes</button>
+                <a href="{% url 'excluir_pedido' pedido.id %}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Tem certeza que deseja remover este registro?');">Remover</a>
+            </td>
         </tr>
         {% endfor %}
-     </tbody>
+    </tbody>
 </table>
-
 {% endblock %}

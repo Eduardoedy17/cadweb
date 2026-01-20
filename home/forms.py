@@ -46,7 +46,7 @@ class ProdutoForm(forms.ModelForm):
         model = Produto
         fields = ['nome', 'preco', 'categoria', 'img_base64']
         widgets = {
-            # Alteração Slide 220: Categoria vira HiddenInput
+            # Categoria oculta para usar com Autocomplete (Slide 15)
             'categoria': forms.HiddenInput(), 
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do Produto'}),
             'preco': forms.TextInput(attrs={'class': 'money form-control', 'maxlength': '500', 'placeholder': '0.000,00'}),
@@ -58,14 +58,14 @@ class ProdutoForm(forms.ModelForm):
         self.fields['preco'].localize = True
         self.fields['preco'].widget.is_localized = True
 
+# Mantido do slide anterior, mas ajustado para não conflitar com a nova lógica se não for usado
+# (O slide 16 foca no ItemPedido, então esse form simples de Pedido abaixo é o essencial para iniciar o pedido)
 class PedidoForm(forms.ModelForm):
     class Meta:
         model = Pedido
-        fields = ['cliente', 'produtos', 'status']
+        fields = ['cliente'] # Apenas cliente no início (Slide 185)
         widgets = {
-            'cliente': forms.Select(attrs={'class': 'form-control'}),
-            'produtos': forms.SelectMultiple(attrs={'class': 'form-control', 'style': 'height: 150px;'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
+            'cliente': forms.HiddenInput(), # ID oculto
         }
 
 class EstoqueForm(forms.ModelForm):

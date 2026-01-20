@@ -1,19 +1,42 @@
 {% extends 'base.html' %}
 
-{% block titulo_conteudo %} {{ titulo|default:"Cadastro de Pedido" }} {% endblock %}
+{% block titulo_conteudo %} Listagem de Clientes {% endblock %}
 
-{% block conteudo %}  
-  
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+{% block conteudo %}
+
+<a href='{% url 'form_cliente' %}' class="btn btn-primary">Inserir Novo</a>
+<a href="" class="btn btn-secondary">Recarregar</a>
+
+<table style="margin-top:15px" class="table table-bordered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nome</th>
+            <th scope="col">C.P.F</th>
+            <th scope="col">Data Nascimento</th>
+            <th scope="col">Ações</th>
+        </tr>
+    </thead>
     
-    <div class="mt-4">
-        {% if not apenas_leitura %}
-            <button type="submit" class="btn btn-primary me-2">Salvar</button>
-        {% endif %}
-        <a href="{% url 'pedido' %}" class="btn btn-secondary">Voltar</a>
-    </div>
+    <tbody>
+        {% for item in lista %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.cpf }}</td>
+            <td>{{ item.data_nascimento_formatada }}</td>
+            <td>
+                <a href="{% url 'novo_pedido' item.id %}" class="btn btn-primary btn-sm">
+                   Novo Pedido
+                </a>
+                
+                <a href="{% url 'editar_cliente' item.id %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'excluir_cliente' item.id %}" class="btn btn-danger btn-sm" 
+                   onclick="return confirm('Tem certeza?');">Remover</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-</form>
 {% endblock %}

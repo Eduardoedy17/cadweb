@@ -1,26 +1,22 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse # Importação Slide 203
-from django.apps import apps # Importação Slide 205
+from django.http import JsonResponse
+from django.apps import apps
 from .models import *
 from .forms import *
 
 def index(request):
     return render(request, 'index.html')
 
-# --- AUTCOMPLETE / TESTES ---
-
-# Slide 208: View Genérica para Autocomplete
+# --- AUTOCOMPLETE / TESTES (Slide 15) ---
 def buscar_dados(request, app_modelo):
-    termo = request.GET.get('q', '') # pega o termo digitado
+    termo = request.GET.get('q', '')
     try:
-        # Divida o app e o modelo
         app, modelo = app_modelo.split('.')
         modelo = apps.get_model(app, modelo)
     except LookupError:
         return JsonResponse({'error': 'Modelo não encontrado'}, status=404)
     
-    # Verifica se o modelo possui os campos 'nome' e 'id'
     if not hasattr(modelo, 'nome') or not hasattr(modelo, 'id'):
         return JsonResponse({'error': 'Modelo deve ter campos "id" e "nome"'}, status=400)
     
@@ -28,11 +24,9 @@ def buscar_dados(request, app_modelo):
     dados = [{'id': obj.id, 'nome': obj.nome} for obj in resultados]
     return JsonResponse(dados, safe=False)
 
-# Slide 174: View de Teste 1
 def teste1(request):
     return render(request, 'testes/teste1.html')
 
-# Slide 226: View de Teste 2
 def teste2(request):
     return render(request, 'testes/teste2.html')
 
@@ -79,7 +73,7 @@ def excluir_categoria(request, id):
     messages.success(request, 'Registro excluído com sucesso!')
     return redirect('categoria')
 
-# --- PRODUTO ---
+# --- PRODUTO & ESTOQUE ---
 def produto(request):
     contexto = {'lista': Produto.objects.all().order_by('-id')}
     return render(request, 'produto/lista.html', contexto)
@@ -121,7 +115,7 @@ def excluir_produto(request, id):
     return redirect('produto')
 
 def ajustar_estoque(request, id):
-    produto = Produto.objects.get(pk=id)
+    produto = get_object_or_404(Produto, pk=id)
     estoque = produto.estoque 
     if request.method == 'POST':
         form = EstoqueForm(request.POST, instance=estoque)
@@ -175,28 +169,31 @@ def excluir_cliente(request, id):
     messages.success(request, 'Cliente excluído!')
     return redirect('cliente')
 
-# --- PEDIDO ---
-def pedido(request):
-    contexto = {'lista': Pedido.objects.all().order_by('-id')}
-    return render(request, 'pedido/lista.html', contexto)
+# --- PEDIDO (Novas Views - Slide 16) ---
 
-def form_pedido(request):
-    if request.method == 'POST':
+def pedido(request):
+    """Lista todos os pedidos (Slide 188)"""
+    lista = Pedido.objects.all().order_by('-id')
+    return render(request, 'pedido/lista.html', {'lista': lista})
+
+def novo_pedido(request, id):
+    """Cria um pedido associado a um cliente (Slide 193)"""
+    if request.method == 'GET':
+        try:
+            cliente = Cliente.objects.get(pk=id)
+        except Cliente.DoesNotExist:
+            messages.error(request, 'Registro não encontrado')
+            return redirect('cliente')
+        
+        # Cria instância com o cliente
+        pedido = Pedido(cliente=cliente)
+        form = PedidoForm(instance=pedido)
+        return render(request, 'pedido/form.html', {'form': form})
+    else:
         form = PedidoForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Pedido salvo com sucesso!')
+            pedido = form.save()
             return redirect('pedido')
-    else:
-        form = PedidoForm()
-    return render(request, 'pedido/formulario.html', {'form': form, 'titulo': 'Cadastro de Pedido'})
-
-def detalhes_pedido(request, id):
-    item = get_object_or_404(Pedido, pk=id)
-    form = PedidoForm(instance=item)
-    for field in form.fields.values():
-        field.widget.attrs['disabled'] = 'disabled'
-    return render(request, 'pedido/formulario.html', {'form': form, 'titulo': 'Detalhes do Pedido', 'apenas_leitura': True})
 
 def editar_pedido(request, id):
     item = get_object_or_404(Pedido, pk=id)
@@ -204,11 +201,10 @@ def editar_pedido(request, id):
         form = PedidoForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Pedido atualizado!')
             return redirect('pedido')
     else:
         form = PedidoForm(instance=item)
-    return render(request, 'pedido/formulario.html', {'form': form, 'titulo': 'Editar Pedido'})
+    return render(request, 'pedido/form.html', {'form': form})
 
 def excluir_pedido(request, id):
     item = get_object_or_404(Pedido, pk=id)
