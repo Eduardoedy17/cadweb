@@ -2,13 +2,16 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.apps import apps
+from django.contrib.auth.decorators import login_required # Importação do decorador
 from .models import *
 from .forms import *
 
+@login_required
 def index(request):
     return render(request, 'index.html')
 
 # --- AUTOCOMPLETE / TESTES ---
+@login_required
 def buscar_dados(request, app_modelo):
     termo = request.GET.get('q', '')
     try:
@@ -24,17 +27,21 @@ def buscar_dados(request, app_modelo):
     dados = [{'id': obj.id, 'nome': obj.nome} for obj in resultados]
     return JsonResponse(dados, safe=False)
 
+@login_required
 def teste1(request):
     return render(request, 'testes/teste1.html')
 
+@login_required
 def teste2(request):
     return render(request, 'testes/teste2.html')
 
 # --- CATEGORIA ---
+@login_required
 def categoria(request):
     contexto = {'lista': Categoria.objects.all().order_by('-id')}
     return render(request, 'categoria/lista.html', contexto)
 
+@login_required
 def form_categoria(request):
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
@@ -47,6 +54,7 @@ def form_categoria(request):
     contexto = {'form': form}
     return render(request, 'categoria/formulario.html', contexto)
 
+@login_required
 def detalhes_categoria(request, id):
     categoria = get_object_or_404(Categoria, pk=id)
     form = CategoriaForm(instance=categoria)
@@ -55,6 +63,7 @@ def detalhes_categoria(request, id):
     contexto = {'form': form, 'titulo': 'Detalhes da Categoria', 'apenas_leitura': True}
     return render(request, 'categoria/formulario.html', contexto)
 
+@login_required
 def editar_categoria(request, id):
     categoria = get_object_or_404(Categoria, pk=id)
     if request.method == 'POST':
@@ -67,6 +76,7 @@ def editar_categoria(request, id):
         form = CategoriaForm(instance=categoria)
     return render(request, 'categoria/formulario.html', {'form': form})
 
+@login_required
 def excluir_categoria(request, id):
     categoria = get_object_or_404(Categoria, pk=id)
     categoria.delete()
@@ -74,10 +84,12 @@ def excluir_categoria(request, id):
     return redirect('categoria')
 
 # --- PRODUTO & ESTOQUE ---
+@login_required
 def produto(request):
     contexto = {'lista': Produto.objects.all().order_by('-id')}
     return render(request, 'produto/lista.html', contexto)
 
+@login_required
 def form_produto(request):
     if request.method == 'POST':
         form = ProdutoForm(request.POST)
@@ -89,6 +101,7 @@ def form_produto(request):
         form = ProdutoForm()
     return render(request, 'produto/formulario.html', {'form': form, 'titulo': 'Cadastro de Produto'})
 
+@login_required
 def detalhes_produto(request, id):
     item = get_object_or_404(Produto, pk=id)
     form = ProdutoForm(instance=item)
@@ -96,6 +109,7 @@ def detalhes_produto(request, id):
         field.widget.attrs['disabled'] = 'disabled'
     return render(request, 'produto/formulario.html', {'form': form, 'titulo': 'Detalhes do Produto', 'apenas_leitura': True})
 
+@login_required
 def editar_produto(request, id):
     item = get_object_or_404(Produto, pk=id)
     if request.method == 'POST':
@@ -108,12 +122,14 @@ def editar_produto(request, id):
         form = ProdutoForm(instance=item)
     return render(request, 'produto/formulario.html', {'form': form, 'titulo': 'Editar Produto'})
 
+@login_required
 def excluir_produto(request, id):
     item = get_object_or_404(Produto, pk=id)
     item.delete()
     messages.success(request, 'Produto excluído!')
     return redirect('produto')
 
+@login_required
 def ajustar_estoque(request, id):
     produto = get_object_or_404(Produto, pk=id)
     estoque = produto.estoque 
@@ -129,10 +145,12 @@ def ajustar_estoque(request, id):
     return render(request, 'produto/estoque.html', {'form': form,})
 
 # --- CLIENTE ---
+@login_required
 def cliente(request):
     contexto = {'lista': Cliente.objects.all().order_by('nome')}
     return render(request, 'cliente/lista.html', contexto)
 
+@login_required
 def form_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
@@ -144,6 +162,7 @@ def form_cliente(request):
         form = ClienteForm()
     return render(request, 'cliente/formulario.html', {'form': form, 'titulo': 'Cadastro de Cliente'})
 
+@login_required
 def detalhes_cliente(request, id):
     item = get_object_or_404(Cliente, pk=id)
     form = ClienteForm(instance=item)
@@ -151,6 +170,7 @@ def detalhes_cliente(request, id):
         field.widget.attrs['disabled'] = 'disabled'
     return render(request, 'cliente/formulario.html', {'form': form, 'titulo': 'Detalhes do Cliente', 'apenas_leitura': True})
 
+@login_required
 def editar_cliente(request, id):
     item = get_object_or_404(Cliente, pk=id)
     if request.method == 'POST':
@@ -163,6 +183,7 @@ def editar_cliente(request, id):
         form = ClienteForm(instance=item)
     return render(request, 'cliente/formulario.html', {'form': form, 'titulo': 'Editar Cliente'})
 
+@login_required
 def excluir_cliente(request, id):
     item = get_object_or_404(Cliente, pk=id)
     item.delete()
@@ -171,10 +192,12 @@ def excluir_cliente(request, id):
 
 # --- PEDIDO ---
 
+@login_required
 def pedido(request):
     lista = Pedido.objects.all().order_by('-id')
     return render(request, 'pedido/lista.html', {'lista': lista})
 
+@login_required
 def novo_pedido(request, id):
     if request.method == 'GET':
         try:
@@ -190,9 +213,10 @@ def novo_pedido(request, id):
         form = PedidoForm(request.POST)
         if form.is_valid():
             pedido = form.save()
-            # Redireciona para detalhes para adicionar produtos (Slide 85)
+            # Redireciona para detalhes para adicionar produtos
             return redirect('detalhes_pedido', id=pedido.id) 
 
+@login_required
 def editar_pedido(request, id):
     item = get_object_or_404(Pedido, pk=id)
     if request.method == 'POST':
@@ -205,6 +229,7 @@ def editar_pedido(request, id):
         form = PedidoForm(instance=item)
     return render(request, 'pedido/formulario.html', {'form': form})
 
+@login_required
 def excluir_pedido(request, id):
     item = get_object_or_404(Pedido, pk=id)
     item.delete()
@@ -213,6 +238,7 @@ def excluir_pedido(request, id):
 
 # --- DETALHES DO PEDIDO ---
 
+@login_required
 def detalhes_pedido(request, id):
     pedido = get_object_or_404(Pedido, pk=id)
     
@@ -221,15 +247,15 @@ def detalhes_pedido(request, id):
         if form.is_valid():
             item = form.save(commit=False)
             item.pedido = pedido
-            item.preco = item.produto.preco # Atribuição automática do preço (Slide 24)
+            item.preco = item.produto.preco 
             
-            # Tratamento de estoque (Slide 27-32)
+            # Tratamento de estoque
             estoque_atual = item.produto.estoque
             
             if estoque_atual.qtde >= item.qtde:
-                estoque_atual.qtde -= item.qtde # Decrementa estoque
+                estoque_atual.qtde -= item.qtde 
                 estoque_atual.save()
-                item.save() # Salva o item
+                item.save() 
                 messages.success(request, 'Item adicionado com sucesso!')
             else:
                 messages.error(request, 'Estoque insuficiente para este produto!')
@@ -244,22 +270,22 @@ def detalhes_pedido(request, id):
     }
     return render(request, 'pedido/detalhes.html', contexto)
 
+@login_required
 def editar_item_pedido(request, id):
     item = get_object_or_404(ItemPedido, pk=id)
     pedido_id = item.pedido.id
     estoque = item.produto.estoque 
 
     if request.method == 'POST':
-        qtde_anterior = item.qtde # Armazena quantidade anterior (Slide 56)
+        qtde_anterior = item.qtde 
         form = ItemPedidoForm(request.POST, instance=item)
         
         if form.is_valid():
             item_obj = form.save(commit=False)
             nova_qtde = item_obj.qtde
-            diferenca = nova_qtde - qtde_anterior # Calcula diferença
+            diferenca = nova_qtde - qtde_anterior 
             
-            # Tratamento de estoque na edição (Slide 59-63)
-            if diferenca > 0: # Aumento de quantidade
+            if diferenca > 0: 
                 if estoque.qtde >= diferenca:
                     estoque.qtde -= diferenca
                     estoque.save()
@@ -268,8 +294,8 @@ def editar_item_pedido(request, id):
                     return redirect('detalhes_pedido', id=pedido_id)
                 else:
                     messages.error(request, 'Estoque insuficiente para a nova quantidade!')
-            else: # Redução de quantidade (diferenca é negativa ou zero)
-                estoque.qtde += abs(diferenca) # Devolve ao estoque
+            else: 
+                estoque.qtde += abs(diferenca) 
                 estoque.save()
                 item_obj.save()
                 messages.success(request, 'Item atualizado com sucesso!')
@@ -278,14 +304,13 @@ def editar_item_pedido(request, id):
     else:
         form = ItemPedidoForm(instance=item)
         
-    # Reutiliza o formulário de pedido ou cria um específico simples
     return render(request, 'pedido/formulario_item.html', {'form': form, 'pedido': item.pedido})
 
+@login_required
 def remover_item_pedido(request, id):
     item = get_object_or_404(ItemPedido, pk=id)
     pedido_id = item.pedido.id
     
-    # Devolve a quantidade ao estoque ao remover (Slide 79/31)
     estoque = item.produto.estoque
     estoque.qtde += item.qtde
     estoque.save()

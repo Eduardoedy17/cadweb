@@ -15,7 +15,6 @@
 </head>
 <body>
      
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="text-center text-white mb-3">
             <h3>Cad Web</h3>
@@ -23,41 +22,61 @@
         {% include 'menu.html' %}
     </div>
 
-    <!-- Main Content -->
     <div class="content" id="content">
-        <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
                 <button class="btn btn-primary" id="toggle-sidebar"><i class="fas fa-bars"></i></button>
                 <a class="navbar-brand ms-3" href="#">Dashboard</a>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item">
                             <a class="nav-link" href="#"><i class="fas fa-envelope"></i></a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#"><i class="fas fa-bell"></i></a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#"><i class="fas fa-user-circle"></i></a>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle"></i> 
+                                {% if user.is_authenticated %}
+                                    {{ user.username }}
+                                {% else %}
+                                    Visitante
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li>
+                                    {% if user.is_authenticated %}
+                                        <a class="dropdown-item" href="{% url 'admin:auth_user_change' user.id %}">Perfil</a>
+                                    {% else %}
+                                        <a class="dropdown-item" href="#">Perfil</a>
+                                    {% endif %}
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">Sair</button>
+                                    </form>
+                                </li>
+                            </ul>
                         </li>
+
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <!-- Dashboard Content -->
         <div class="container-fluid mt-4">
 
     {% if messages %}
         {% for message in messages %}
-            <!-- Alert area start-->
             <div class="alert alert-{{ message.tags }} {% if message.tags == 'error' %}alert-danger{% endif %}  alert-dismissible">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>    
-            <!-- Alert area End-->
-        {% endfor %}
+            {% endfor %}
     {% endif %}
 
             <div class="row">
@@ -121,10 +140,6 @@
             $('.autocomplete').each(function() {
                  autoComplete(this);
             });
-
-
-
-            
          });
 
     </script>
