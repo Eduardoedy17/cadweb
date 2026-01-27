@@ -34,11 +34,10 @@ urlpatterns = [
     # --- PEDIDO ---
     path('pedido/', views.pedido, name='pedido'),
     path('pedido/form/<int:id>', views.novo_pedido, name='novo_pedido'),
-    
-    # NOVAS ROTAS (Slide 17)
     path('pedido/detalhes/<int:id>', views.detalhes_pedido, name='detalhes_pedido'),
-    path('pedido/remover_item/<int:id>', views.remover_item_pedido, name='remover_item_pedido'),
-    
-    # CORREÇÃO: Adicionada a rota que faltava para excluir pedido
     path('pedido/excluir/<int:id>', views.excluir_pedido, name='excluir_pedido'),
+    
+    # NOVAS ROTAS PARA ITENS (Slide 83)
+    path('pedido/remover_item/<int:id>', views.remover_item_pedido, name='remover_item_pedido'),
+    path('pedido/editar_item/<int:id>', views.editar_item_pedido, name='editar_item_pedido'),
 ]

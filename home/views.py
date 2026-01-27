@@ -190,7 +190,8 @@ def novo_pedido(request, id):
         form = PedidoForm(request.POST)
         if form.is_valid():
             pedido = form.save()
-            return redirect('pedido')
+            # Redireciona para detalhes para adicionar produtos (Slide 85)
+            return redirect('detalhes_pedido', id=pedido.id) 
 
 def editar_pedido(request, id):
     item = get_object_or_404(Pedido, pk=id)
@@ -220,9 +221,19 @@ def detalhes_pedido(request, id):
         if form.is_valid():
             item = form.save(commit=False)
             item.pedido = pedido
-            item.preco = item.produto.preco
-            item.save()
-            messages.success(request, 'Item adicionado com sucesso!')
+            item.preco = item.produto.preco # Atribuição automática do preço (Slide 24)
+            
+            # Tratamento de estoque (Slide 27-32)
+            estoque_atual = item.produto.estoque
+            
+            if estoque_atual.qtde >= item.qtde:
+                estoque_atual.qtde -= item.qtde # Decrementa estoque
+                estoque_atual.save()
+                item.save() # Salva o item
+                messages.success(request, 'Item adicionado com sucesso!')
+            else:
+                messages.error(request, 'Estoque insuficiente para este produto!')
+
             return redirect('detalhes_pedido', id=id)
     else:
         form = ItemPedidoForm()
@@ -233,9 +244,52 @@ def detalhes_pedido(request, id):
     }
     return render(request, 'pedido/detalhes.html', contexto)
 
+def editar_item_pedido(request, id):
+    item = get_object_or_404(ItemPedido, pk=id)
+    pedido_id = item.pedido.id
+    estoque = item.produto.estoque 
+
+    if request.method == 'POST':
+        qtde_anterior = item.qtde # Armazena quantidade anterior (Slide 56)
+        form = ItemPedidoForm(request.POST, instance=item)
+        
+        if form.is_valid():
+            item_obj = form.save(commit=False)
+            nova_qtde = item_obj.qtde
+            diferenca = nova_qtde - qtde_anterior # Calcula diferença
+            
+            # Tratamento de estoque na edição (Slide 59-63)
+            if diferenca > 0: # Aumento de quantidade
+                if estoque.qtde >= diferenca:
+                    estoque.qtde -= diferenca
+                    estoque.save()
+                    item_obj.save()
+                    messages.success(request, 'Item atualizado com sucesso!')
+                    return redirect('detalhes_pedido', id=pedido_id)
+                else:
+                    messages.error(request, 'Estoque insuficiente para a nova quantidade!')
+            else: # Redução de quantidade (diferenca é negativa ou zero)
+                estoque.qtde += abs(diferenca) # Devolve ao estoque
+                estoque.save()
+                item_obj.save()
+                messages.success(request, 'Item atualizado com sucesso!')
+                return redirect('detalhes_pedido', id=pedido_id)
+                
+    else:
+        form = ItemPedidoForm(instance=item)
+        
+    # Reutiliza o formulário de pedido ou cria um específico simples
+    return render(request, 'pedido/formulario_item.html', {'form': form, 'pedido': item.pedido})
+
 def remover_item_pedido(request, id):
     item = get_object_or_404(ItemPedido, pk=id)
     pedido_id = item.pedido.id
+    
+    # Devolve a quantidade ao estoque ao remover (Slide 79/31)
+    estoque = item.produto.estoque
+    estoque.qtde += item.qtde
+    estoque.save()
+    
     item.delete()
-    messages.success(request, 'Item removido com sucesso!')
+    messages.success(request, 'Item removido e estoque restaurado!')
     return redirect('detalhes_pedido', id=pedido_id)

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo_conteudo %} Detalhes do Pedido {% endblock titulo_conteudo %}
+{% block titulo_conteudo %} Detalhes do Pedido #{{ pedido.id }} {% endblock titulo_conteudo %}
 
 {% block conteudo %}
 
@@ -29,44 +29,55 @@
             {{ form.qtde }}
         </div>
         <div class="col-md-3">
-            <button class="btn btn-success w-100" type="submit">Adicionar</button>
+            <button class="btn btn-success w-100" type="submit">Salvar Produto</button>
         </div>
     </form>
 </div>
 {% endif %}
 
 <h5>Itens do Pedido</h5>
-<table class="table table-hover table-striped">
+<table class="table table-hover table-striped align-middle">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Produto</th>
+            <th>ID</th> <th>#</th>  <th>Produto</th>
             <th>Quantidade</th>
-            <th>Valor Unit.</th>
-            <th>Subtotal</th>
-            <th>Ações</th>
+            <th>Preço Unitário (R$)</th>
+            <th>Total (R$)</th> <th>Ações</th>
         </tr>
     </thead>
     <tbody>
         {% for item in pedido.itempedido_set.all %}
         <tr>
-            <td>{{ item.id }}</td>
+            <td>{{ item.produto.id }}</td>
+            <td>
+                {% if item.produto.img_base64 %}
+                    <img src="{{ item.produto.img_base64 }}" style="max-width: 40px; max-height: 40px;">
+                {% else %}
+                    <i class="fas fa-image text-muted"></i>
+                {% endif %}
+            </td>
             <td>{{ item.produto.nome }}</td>
             <td>{{ item.qtde }}</td>
-            <td>R$ {{ item.preco }}</td>
-            <td>R$ {% widthratio item.qtde 1 item.preco %}</td>
-            <td>
+            <td>{{ item.preco }}</td>
+            <td>{{ item.total }}</td> <td>
                 {% if pedido.status == 1 %}
+                <a href="{% url 'editar_item_pedido' item.id %}" class="btn btn-warning btn-sm">Editar</a>
                 <a href="{% url 'remover_item_pedido' item.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?');">Remover</a>
                 {% endif %}
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="6" class="text-center text-muted">Nenhum item adicionado.</td>
+            <td colspan="7" class="text-center text-muted">Nenhum item adicionado.</td>
         </tr>
         {% endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5" class="text-end"><strong>Total do Pedido:</strong></td>
+            <td colspan="2"><strong>R$ {{ pedido.total }}</strong></td>
+        </tr>
+    </tfoot>
 </table>
 
 <div class="mt-3">

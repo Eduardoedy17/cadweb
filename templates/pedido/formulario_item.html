@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block titulo_conteudo %} Editar Item do Pedido {% endblock titulo_conteudo %}
+
+{% block conteudo %} 
+
+<div class="card p-3">
+    <p><strong>Produto:</strong> {{ form.instance.produto.nome }}</p>
+    <p><strong>Preço Unitário:</strong> R$ {{ form.instance.preco }}</p>
+    
+    <form method="post">
+        {% csrf_token %}    
+        
+        <div class="mb-3">
+            <label for="{{ form.qtde.id_for_label }}">Quantidade:</label>
+            {{ form.qtde }}
+        </div>
+        
+        <div style="display:none;">
+            {{ form.produto }}
+        </div>
+
+        <button class="btn btn-primary" type="submit">Salvar Alterações</button>
+        <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+{% endblock conteudo %}

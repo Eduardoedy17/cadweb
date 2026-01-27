@@ -44,7 +44,7 @@ class Estoque(models.Model):
     def __str__(self):
         return f'{self.produto.nome} - Quantidade: {self.qtde}'
 
-# --- MODELOS DO PEDIDO (Estritamente conforme Slide/Prompt) ---
+# --- MODELOS DO PEDIDO ---
 
 class Pedido(models.Model):
     NOVO = 1
@@ -65,7 +65,6 @@ class Pedido(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=NOVO)
 
     def __str__(self):
-        # Formatação exata solicitada
         return f"Pedido {self.id} - Cliente: {self.cliente.nome} - Status: {self.get_status_display()}"
 
     @property
@@ -73,6 +72,17 @@ class Pedido(models.Model):
         if self.data_pedido:
             return self.data_pedido.strftime('%d/%m/%Y %H:%M')
         return None 
+
+    @property
+    def total(self):
+        # Calcula o total de todos os itens no pedido (Slide 69/70)
+        total = sum(item.qtde * item.preco for item in self.itempedido_set.all())
+        return total
+
+    @property
+    def qtdeItens(self):
+        # Conta a qtde de itens no pedido (Slide 69/70)
+        return self.itempedido_set.count()
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
@@ -82,3 +92,8 @@ class ItemPedido(models.Model):
 
     def __str__(self):
         return f"{self.produto.nome} (Qtd: {self.qtde}) - Preço Unitário: {self.preco}"
+
+    @property
+    def total(self):
+        # Calcula o total do item (Slide 76)
+        return self.qtde * self.preco

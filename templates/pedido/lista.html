@@ -15,9 +15,7 @@
         <th>Cliente</th>
         <th>Data</th>
         <th>Situação</th>
-        <th>Produtos</th>
-        <th>Total (R$)</th>
-        <th>Ações</th>
+        <th>Produtos</th> <th>Total (R$)</th> <th>Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -27,9 +25,7 @@
         <td>{{ pedido.cliente.nome }}</td>
         <td>{{ pedido.data_pedidof}}</td>
         <td>{{ pedido.get_status_display }}</td>
-        <td>?</td>  
-        <td>?</td>      
-        <td>
+        <td>{{ pedido.qtdeItens }}</td>  <td>{{ pedido.total }}</td>      <td>
           <button onClick="location='{% url 'detalhes_pedido' pedido.id %}'" type="button" class="btn btn-primary btn-sm">Detalhes</button>
           
           <a href="{% url 'excluir_pedido' pedido.id %}" class="btn btn-danger btn-sm" 
