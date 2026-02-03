@@ -47,7 +47,7 @@ Registro de Pagamento - Pedido #{{ pedido.id }}
                     {% if form.valor.errors %}
                         <div class="text-danger small">{{ form.valor.errors }}</div>
                     {% endif %}
-                    <small class="text-muted">Use vírgula para centavos (Ex: 10,50)</small>
+                    <small class="text-muted">Use "." para fracionar o valor (Ex: 10.50)</small>
                 </div>
                 
                 <div class="col-md-2 d-flex align-items-end">
@@ -114,9 +114,8 @@ Registro de Pagamento - Pedido #{{ pedido.id }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
     $(document).ready(function(){
-        // Máscara para aceitar milhares e centavos no padrão brasileiro
-        // O reverse: true faz o preenchimento da direita para a esquerda
-        $('.money').mask('#.##0,00', {reverse: true});
+        // Remova ou comente a linha abaixo se o erro persistir
+        // $('.money').mask('#.##0,00', {reverse: true});
     });
 </script>
 {% endblock %}

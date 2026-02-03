@@ -73,7 +73,7 @@ class Pedido(models.Model):
 
     @property
     def total(self):
-        # Soma todos os itens do pedido usando Decimal para precisão financeira (aceita centavos)
+        # Soma garantida como Decimal para evitar erro de centavos
         return sum((item.qtde * item.preco for item in self.itempedido_set.all()), Decimal('0.00'))
 
     @property
@@ -83,21 +83,20 @@ class Pedido(models.Model):
     # --- PROPRIEDADES DE PAGAMENTO ---
     @property
     def pagamentos(self):
-        # Retorna a lista de pagamentos salvos para este pedido
+        # Acessa os pagamentos vinculados diretamente pelo related_name padrão
         return self.pagamento_set.all().order_by('-data_pgto')
 
     @property
     def total_pago(self):
-        # Soma dinâmica dos valores registrados na tabela Pagamento para este pedido
-        # Essencial para que a Nota Fiscal mostre os valores recebidos
+        # Soma dinâmica de todos os registros de pagamento vinculados a este pedido
         return sum((pgto.valor for pgto in self.pagamento_set.all()), Decimal('0.00'))
 
     @property
     def debito(self):
-        # Calcula o saldo devedor subtraindo o total pago do total do pedido em tempo real
+        # Diferença exata entre o total do pedido e o que já foi pago
         return self.total - self.total_pago
 
-    # --- CÁLCULO DE IMPOSTOS (Utilizando Decimal para evitar erros de arredondamento) ---
+    # --- CÁLCULO DE IMPOSTOS (DECIMAL) ---
     @property
     def icms(self): 
         return (self.total * Decimal('0.18')).quantize(Decimal('0.01'))
@@ -116,16 +115,14 @@ class Pedido(models.Model):
     
     @property
     def total_impostos(self):
-        return self.icms + self.ipi + self.pis + self.cofins
+        return (self.icms + self.ipi + self.pis + self.cofins).quantize(Decimal('0.01'))
 
     @property
     def valor_final_nota(self):
-        # Valor total considerando os impostos conforme o desafio
-        return self.total + self.total_impostos
+        return (self.total + self.total_impostos).quantize(Decimal('0.01'))
 
     @property
     def chave_acesso(self):
-        # Geração da chave de acesso única baseada no ID e data
         random.seed(self.id)
         aleatorio = random.randint(100000, 999999)
         data_str = self.data_pedido.strftime('%Y%m%d') if self.data_pedido else "00000000"
@@ -139,7 +136,7 @@ class ItemPedido(models.Model):
 
     @property
     def total(self):
-        return self.qtde * self.preco
+        return (self.qtde * self.preco).quantize(Decimal('0.01'))
 
 class Pagamento(models.Model):
     DINHEIRO = 1
@@ -159,6 +156,9 @@ class Pagamento(models.Model):
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     data_pgto = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Pagamento {self.id} - Pedido {self.pedido.id}"
+
     @property
     def data_pgtof(self):
-        return self.data_pgto.strftime('%d/%m/%Y %H:%M')
+        return self.data_pgto.strftime('%d/%m/%Y %H:%M') if self.data_pgto else ""

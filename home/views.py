@@ -315,7 +315,6 @@ def excluir_pedido(request, id):
 
 @login_required
 def form_pagamento(request, id):
-    """Gere o registo de pagamentos do pedido."""
     pedido = get_object_or_404(Pedido, pk=id)
     if request.method == 'POST':
         form = PagamentoForm(request.POST)
@@ -323,16 +322,14 @@ def form_pagamento(request, id):
             pagamento = form.save(commit=False)
             pagamento.pedido = pedido
             
-            # CORREÇÃO: Comparação de centavos 100% precisa usando Decimal
             if pagamento.valor > pedido.debito:
-                messages.error(request, f"Erro: Valor de R$ {pagamento.valor} é superior ao débito de R$ {pedido.debito}")
+                messages.error(request, f"Valor superior ao débito de R$ {pedido.debito}")
             else:
-                pagamento.save()  # Persiste no Banco de Dados
-                messages.success(request, 'Pagamento registado com sucesso!')
-                # Redireciona para atualizar as somas dinâmicas do Model
+                pagamento.save()
+                messages.success(request, 'Pagamento registrado!')
                 return redirect('form_pagamento', id=id)
     else:
-        # Sugere o valor do débito atual (incluindo centavos) no formulário inicial
+        # Força o valor inicial a ser exibido com ponto
         form = PagamentoForm(initial={'pedido': pedido, 'valor': pedido.debito})
         
     return render(request, 'pedido/pagamento.html', {'pedido': pedido, 'form': form})

@@ -60,28 +60,19 @@ class PagamentoForm(forms.ModelForm):
         widgets = {
             'pedido': forms.HiddenInput(),
             'forma': forms.Select(attrs={'class': 'form-control'}),
-            # Campo de texto para suportar a máscara jQuery
-            'valor': forms.TextInput(attrs={'class': 'money form-control', 'placeholder': '0,00'}),
+            # Trocamos para NumberInput e removemos a classe 'money'
+            'valor': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'step': '0.01', 
+                'placeholder': '0.00'
+            }),
         }
 
     def clean_valor(self):
-        valor_raw = self.cleaned_data.get('valor')
-        
-        # Converte para string para garantir a limpeza dos caracteres da máscara
-        valor_str = str(valor_raw)
-        
-        try:
-            # 1. Remove o ponto separador de milhar (ex: 1.250,50 -> 1250,50)
-            # 2. Substitui a vírgula decimal por ponto (ex: 1250,50 -> 1250.50)
-            valor_limpo = valor_str.replace('.', '').replace(',', '.')
-            valor_decimal = Decimal(valor_limpo)
-        except (ValueError, TypeError, Exception):
-            raise forms.ValidationError("Informe um valor numérico válido (ex: 1.250,50).")
-
-        if valor_decimal <= 0:
+        valor = self.cleaned_data.get('valor')
+        if valor <= 0:
             raise forms.ValidationError("O valor deve ser maior que zero.")
-            
-        return valor_decimal
+        return valor
 
 class EstoqueForm(forms.ModelForm):
     class Meta:
