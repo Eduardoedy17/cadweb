@@ -73,7 +73,7 @@ class Pedido(models.Model):
 
     @property
     def total(self):
-        # Soma inicializada com Decimal para evitar conflitos de tipo
+        # Soma todos os itens do pedido usando Decimal para precisão financeira (aceita centavos)
         return sum((item.qtde * item.preco for item in self.itempedido_set.all()), Decimal('0.00'))
 
     @property
@@ -83,17 +83,21 @@ class Pedido(models.Model):
     # --- PROPRIEDADES DE PAGAMENTO ---
     @property
     def pagamentos(self):
-        return Pagamento.objects.filter(pedido=self)
+        # Retorna a lista de pagamentos salvos para este pedido
+        return self.pagamento_set.all().order_by('-data_pgto')
 
     @property
     def total_pago(self):
-        return sum((pgto.valor for pgto in self.pagamentos), Decimal('0.00'))
+        # Soma dinâmica dos valores registrados na tabela Pagamento para este pedido
+        # Essencial para que a Nota Fiscal mostre os valores recebidos
+        return sum((pgto.valor for pgto in self.pagamento_set.all()), Decimal('0.00'))
 
     @property
     def debito(self):
+        # Calcula o saldo devedor subtraindo o total pago do total do pedido em tempo real
         return self.total - self.total_pago
 
-    # --- DESAFIO: IMPOSTOS (CORRIGIDOS PARA DECIMAL) ---
+    # --- CÁLCULO DE IMPOSTOS (Utilizando Decimal para evitar erros de arredondamento) ---
     @property
     def icms(self): 
         return (self.total * Decimal('0.18')).quantize(Decimal('0.01'))
@@ -116,14 +120,16 @@ class Pedido(models.Model):
 
     @property
     def valor_final_nota(self):
+        # Valor total considerando os impostos conforme o desafio
         return self.total + self.total_impostos
 
     @property
     def chave_acesso(self):
+        # Geração da chave de acesso única baseada no ID e data
         random.seed(self.id)
         aleatorio = random.randint(100000, 999999)
-        # Formatação padrão de 44 dígitos para simular NF-e
-        return f"{self.data_pedido.strftime('%Y%m%d')}{self.id:06d}{aleatorio}300156134409126"
+        data_str = self.data_pedido.strftime('%Y%m%d') if self.data_pedido else "00000000"
+        return f"{data_str}{self.id:06d}{aleatorio}300156134409126"
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)

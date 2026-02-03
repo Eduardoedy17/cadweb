@@ -311,11 +311,11 @@ def excluir_pedido(request, id):
     messages.success(request, 'Pedido excluído!')
     return redirect('pedido')
 
-# --- PAGAMENTO (Slide 19) ---
+# --- PAGAMENTO ---
 
 @login_required
 def form_pagamento(request, id):
-    """Gera o registro de pagamentos do pedido."""
+    """Gere o registo de pagamentos do pedido."""
     pedido = get_object_or_404(Pedido, pk=id)
     if request.method == 'POST':
         form = PagamentoForm(request.POST)
@@ -323,33 +323,33 @@ def form_pagamento(request, id):
             pagamento = form.save(commit=False)
             pagamento.pedido = pedido
             
-            # CORREÇÃO: Usando objetos Decimal consistentes para comparação 
-            # (evita o TypeError e garante precisão financeira)
+            # CORREÇÃO: Comparação de centavos 100% precisa usando Decimal
             if pagamento.valor > pedido.debito:
-                messages.error(request, f"Valor superior ao débito de R$ {pedido.debito}")
+                messages.error(request, f"Erro: Valor de R$ {pagamento.valor} é superior ao débito de R$ {pedido.debito}")
             else:
-                pagamento.save()
-                messages.success(request, 'Pagamento registrado!')
+                pagamento.save()  # Persiste no Banco de Dados
+                messages.success(request, 'Pagamento registado com sucesso!')
+                # Redireciona para atualizar as somas dinâmicas do Model
                 return redirect('form_pagamento', id=id)
     else:
-        # Sugere o valor do débito restante no formulário inicial
+        # Sugere o valor do débito atual (incluindo centavos) no formulário inicial
         form = PagamentoForm(initial={'pedido': pedido, 'valor': pedido.debito})
         
     return render(request, 'pedido/pagamento.html', {'pedido': pedido, 'form': form})
 
 @login_required
 def excluir_pagamento(request, id):
-    """Remove um registro de pagamento."""
+    """Remove um registo de pagamento e liberta o valor no débito."""
     pg = get_object_or_404(Pagamento, pk=id)
     pedido_id = pg.pedido.id
     pg.delete()
-    messages.success(request, 'Pagamento removido.')
+    messages.success(request, 'Pagamento removido com sucesso.')
     return redirect('form_pagamento', id=pedido_id)
 
-# --- NOTA FISCAL (Slide 19) ---
+# --- NOTA FISCAL ---
 
 @login_required
 def nota_fiscal(request, id):
-    """Exibe a nota fiscal detalhada com cálculos de impostos."""
+    """Exibe a nota fiscal detalhada com cálculos de impostos dinâmicos."""
     pedido = get_object_or_404(Pedido, pk=id)
     return render(request, 'pedido/nota_fiscal.html', {'pedido': pedido})

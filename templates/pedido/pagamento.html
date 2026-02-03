@@ -1,64 +1,122 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block titulo_conteudo %}
+Registro de Pagamento - Pedido #{{ pedido.id }}
+{% endblock %}
+
 {% block conteudo %}
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Registro de Pagamento - Pedido #{{ pedido.id }}</h4>
+<div class="card p-3 shadow-sm">
+    <h4 class="border-bottom pb-2">Caixa do Pedido #{{ pedido.id }}</h4>
+    
+    <div class="row bg-light p-3 mb-4 rounded border">
+        <div class="col-md-4 text-center">
+            <strong>Total Pedido:</strong><br>
+            <span class="fs-5">R$ {{ pedido.total|floatformat:2 }}</span>
         </div>
-        <div class="card-body">
-            <div class="row mb-4 border-bottom pb-3">
-                <div class="col-md-4"><strong>Cliente:</strong> {{ pedido.cliente.nome }}</div>
-                <div class="col-md-4 text-center"><strong>Total:</strong> R$ {{ pedido.total|floatformat:2 }}</div>
-                <div class="col-md-4 text-end">
-                    <strong class="text-danger">Débito Restante: R$ {{ pedido.debito|floatformat:2 }}</strong>
-                </div>
-            </div>
-
-            <form method="post" class="mb-5">
-                {% csrf_token %}
-                {{ form.pedido }}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Forma de Pagamento:</label>
-                        {{ form.forma }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Valor:</label>
-                        {{ form.valor }}
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-success">Salvar Pagamento</button>
-                <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">Voltar</a>
-            </form>
-
-            <h5>Pagamentos Realizados</h5>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Forma</th>
-                        <th class="text-end">Valor</th>
-                        <th class="text-center">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pg in pedido.pagamento_set.all %}
-                    <tr>
-                        <td>{{ pg.data_pgto|date:"d/m/Y H:i" }}</td>
-                        <td>{{ pg.get_forma_display }}</td>
-                        <td class="text-end">R$ {{ pg.valor|floatformat:2 }}</td>
-                        <td class="text-center">
-                            <a href="{% url 'remover_pagamento' pg.id %}" class="text-danger" onclick="return confirm('Excluir este pagamento?')">Excluir</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">Nenhum pagamento registrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-md-4 text-center text-success border-start border-end">
+            <strong>Total Pago:</strong><br>
+            <span class="fs-5">R$ {{ pedido.total_pago|floatformat:2 }}</span>
+        </div>
+        <div class="col-md-4 text-center text-danger">
+            <strong>Débito Restante:</strong><br>
+            <span class="fs-5 fw-bold">R$ {{ pedido.debito|floatformat:2 }}</span>
         </div>
     </div>
+
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <strong>Cadastrar Novo Pagamento</strong>
+        </div>
+        <div class="card-body">
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                {{ form.pedido }}
+                
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">Forma de Pagamento:</label>
+                    {{ form.forma }}
+                    {% if form.forma.errors %}
+                        <div class="text-danger small">{{ form.forma.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">Valor (R$):</label>
+                    {{ form.valor }}
+                    {% if form.valor.errors %}
+                        <div class="text-danger small">{{ form.valor.errors }}</div>
+                    {% endif %}
+                    <small class="text-muted">Use vírgula para centavos (Ex: 10,50)</small>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-plus-circle"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h5 class="mb-3"><i class="bi bi-cash-stack"></i> Pagamentos Realizados</h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Forma</th>
+                    <th class="text-end">Valor</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pg in pedido.pagamento_set.all %}
+                <tr>
+                    <td>{{ pg.data_pgto|date:"d/m/Y H:i" }}</td>
+                    <td><span class="badge bg-info text-dark">{{ pg.get_forma_display }}</span></td>
+                    <td class="text-end fw-bold">R$ {{ pg.valor|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'excluir_pagamento' pg.id %}" 
+                           class="btn btn-sm btn-outline-danger" 
+                           onclick="return confirm('Deseja realmente excluir este pagamento?')">
+                            <i class="bi bi-trash"></i> Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                        Nenhum pagamento registrado para este pedido.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3 border-top pt-3 d-flex justify-content-between align-items-center">
+        <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar ao Pedido
+        </a>
+        
+        {% if pedido.debito <= 0 %}
+            <a href="{% url 'nota_fiscal' pedido.id %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-file-earmark-text"></i> Gerar Nota Fiscal
+            </a>
+        {% else %}
+            <span class="badge bg-warning text-dark p-2">Aguardando quitação para liberar Nota Fiscal</span>
+        {% endif %}
+    </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+    $(document).ready(function(){
+        // Máscara para aceitar milhares e centavos no padrão brasileiro
+        // O reverse: true faz o preenchimento da direita para a esquerda
+        $('.money').mask('#.##0,00', {reverse: true});
+    });
+</script>
 {% endblock %}

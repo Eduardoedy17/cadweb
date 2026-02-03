@@ -53,8 +53,8 @@ DANFE - Nota Fiscal Eletrônica
                         <td>{{ item.produto.nome }}</td>
                         <td class="text-center">{{ item.qtde }}</td>
                         <td class="text-center">UN</td>
-                        <td class="text-end">{{ item.preco|floatformat:2 }}</td>
-                        <td class="text-end">{{ item.total|floatformat:2 }}</td>
+                        <td class="text-end">R$ {{ item.preco|floatformat:2 }}</td>
+                        <td class="text-end">R$ {{ item.total|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -80,8 +80,31 @@ DANFE - Nota Fiscal Eletrônica
             </div>
 
             <div class="row mt-4">
-                <div class="col-md-12 text-end">
+                <div class="col-md-6">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th colspan="2" class="text-center small">DADOS DO PAGAMENTO</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+                            {% for pg in pedido.pagamento_set.all %}
+                            <tr>
+                                <td>{{ pg.get_forma_display }}</td>
+                                <td class="text-end">R$ {{ pg.valor|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Nenhum pagamento registrado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-6 text-end">
                     <p class="mb-1">TOTAL PRODUTOS: R$ {{ pedido.total|floatformat:2 }}</p>
+                    <p class="mb-1 text-success">TOTAL PAGO: R$ {{ pedido.total_pago|floatformat:2 }}</p>
                     <p class="mb-1">TOTAL IMPOSTOS: R$ {{ pedido.total_impostos|floatformat:2 }}</p>
                     <h4 class="fw-bold mt-2">VALOR TOTAL DA NOTA: R$ {{ pedido.valor_final_nota|floatformat:2 }}</h4>
                 </div>
@@ -89,8 +112,12 @@ DANFE - Nota Fiscal Eletrônica
 
         </div>
         <div class="card-footer text-center d-print-none">
-            <button onclick="window.print();" class="btn btn-primary">Imprimir Nota Fiscal</button>
-            <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">Voltar ao Pedido</a>
+            <button onclick="window.print();" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Imprimir Nota Fiscal
+            </button>
+            <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar ao Pedido
+            </a>
         </div>
     </div>
 </div>
