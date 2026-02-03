@@ -42,7 +42,7 @@ urlpatterns = [
     path('pedido/editar_item/<int:id>', views.editar_item_pedido, name='editar_item_pedido'),
 
     # Pagamento e Nota Fiscal (Slide 19)
-    path('pedido/pagamento/<int:id>', views.form_pagamento, name='form_pagamento'),
-    path('pedido/excluir_pagamento/<int:id>', views.excluir_pagamento, name='excluir_pagamento'),
-    path('pedido/nota_fiscal/<int:id>', views.nota_fiscal, name='nota_fiscal'),
+    path('pedido/pagamento/<int:id>/', views.form_pagamento, name='form_pagamento'),
+    path('pedido/excluir_pagamento/<int:id>/', views.excluir_pagamento, name='excluir_pagamento'),
+    path('pedido/nota_fiscal/<int:id>/', views.nota_fiscal, name='nota_fiscal'),
 ]

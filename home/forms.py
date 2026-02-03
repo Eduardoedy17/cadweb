@@ -8,7 +8,7 @@ class CategoriaForm(forms.ModelForm):
         fields = ['nome', 'ordem']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
-            'ordem': forms.NumberInput(attrs={'class': 'inteiro form-control'}),
+            'ordem': forms.NumberInput(attrs={'class': 'inteiro form-control', 'placeholder': ''}),
         }
 
 class ClienteForm(forms.ModelForm):
@@ -16,11 +16,11 @@ class ClienteForm(forms.ModelForm):
         model = Cliente
         fields = ['nome', 'cpf', 'datanasc', 'telefone', 'email']
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control'}),
-            'cpf': forms.TextInput(attrs={'class': 'cpf form-control'}),
-            'datanasc': forms.DateInput(attrs={'class': 'data form-control'}),
-            'telefone': forms.TextInput(attrs={'class': 'telefone form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome Completo'}),
+            'cpf': forms.TextInput(attrs={'class': 'cpf form-control', 'placeholder': '000.000.000-00'}),
+            'datanasc': forms.DateInput(attrs={'class': 'data form-control', 'placeholder': 'dd/mm/aaaa'}),
+            'telefone': forms.TextInput(attrs={'class': 'telefone form-control', 'placeholder': '(00) 00000-0000'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
         }
 
 class ProdutoForm(forms.ModelForm):
@@ -29,18 +29,18 @@ class ProdutoForm(forms.ModelForm):
         fields = ['nome', 'preco', 'categoria', 'img_base64']
         widgets = {
             'categoria': forms.HiddenInput(), 
-            'nome': forms.TextInput(attrs={'class': 'form-control'}),
-            'preco': forms.TextInput(attrs={'class': 'money form-control'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do Produto'}),
+            'preco': forms.TextInput(attrs={'class': 'money form-control', 'maxlength': '500', 'placeholder': '0.000,00'}),
             'img_base64': forms.HiddenInput(),
         }
 
 class EstoqueForm(forms.ModelForm):
     class Meta:
         model = Estoque
-        fields = ['produto','qtde']
+        fields = ['produto', 'qtde']
         widgets = {
             'produto': forms.HiddenInput(),
-            'qtde':forms.TextInput(attrs={'class': 'inteiro form-control'}),
+            'qtde': forms.TextInput(attrs={'class': 'inteiro form-control'}),
         }
 
 class PedidoForm(forms.ModelForm):
@@ -57,7 +57,7 @@ class ItemPedidoForm(forms.ModelForm):
         fields = ['produto', 'qtde']
         widgets = {
             'produto': forms.Select(attrs={'class': 'form-control'}),
-            'qtde': forms.TextInput(attrs={'class': 'inteiro form-control'}),
+            'qtde': forms.TextInput(attrs={'class': 'inteiro form-control', 'placeholder': 'Qtde'}),
         }
 
 class PagamentoForm(forms.ModelForm):
@@ -73,7 +73,6 @@ class PagamentoForm(forms.ModelForm):
     def clean_valor(self):
         valor_str = self.cleaned_data.get('valor')
         try:
-            # Converte formato brasileiro 1.234,56 para decimal
             valor_limpo = valor_str.replace('.', '').replace(',', '.')
             valor = float(valor_limpo)
         except:
