@@ -53,8 +53,6 @@ body {
     color: #fff;
 }
 
-
-
 .card-custom {
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -79,35 +77,74 @@ body {
 }
 
 .container-fluid.mt-4 .row {
-    margin-bottom: 1rem; /* Ajuste o valor conforme necessário */
+    margin-bottom: 1rem;
 }
 
 .barrabotoes {
-    margin-bottom: 0.5rem; /* Ajuste o valor conforme necessário */
+    margin-bottom: 0.5rem;
     padding: 5px;
 }
 
-h5{
+h5 {
     margin: 5px;
-
 }
 
-
 .errorlist {
-    list-style-type: none; /* Remove os pontinhos */
+    list-style-type: none;
+}
 
- 
+/* --- AJUSTES PARA ALINHAMENTO EM LINHA --- */
+
+/* Classe para agrupar campos horizontalmente */
+.form-row-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: nowrap;
+}
+
+.form-row-inline label {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+/* Garante que os inputs normais ocupem 100% da largura do container pai */
+form p input, 
+form p select, 
+form p textarea {
+    width: 100%;
+    display: block;
+    margin-bottom: 15px;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+}
+
+/* Ajuste específico para campos dentro da linha inline */
+.form-row-inline input, 
+.form-row-inline select {
+    margin-bottom: 0 !important;
+    flex: 1;
 }
 
 .canvas {
-        display: block;
-        margin: 20px auto; /* Centraliza horizontalmente e adiciona margem superior */
-        border:1px solid #4e4c4cfa;
-        border-radius: 10px;
-        padding: 10px;
+    display: block;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .fieldset {
-    border: 1px solid rgba(0, 0, 0, 0.2); /* Borda clarinha */
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin-top: 20px;
+    clear: both;
+    border-radius: 10px;
     font-size: 1rem;
-  }
+}

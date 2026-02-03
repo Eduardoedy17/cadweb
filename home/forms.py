@@ -29,7 +29,8 @@ class ProdutoForm(forms.ModelForm):
         fields = ['nome', 'preco', 'categoria', 'img_base64']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
-            'preco': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            # Adicionada a classe 'money' para o JavaScript aplicar a máscara
+            'preco': forms.TextInput(attrs={'class': 'form-control money'}), 
             'categoria': forms.Select(attrs={'class': 'form-control'}),
             'img_base64': forms.HiddenInput(),
         }
@@ -64,7 +65,7 @@ class PagamentoForm(forms.ModelForm):
             'valor': forms.NumberInput(attrs={
                 'class': 'form-control', 
                 'step': '0.01', 
-                'placeholder': '0.00'
+                'placeholder': '0,00'
             }),
         }
 

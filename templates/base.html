@@ -110,8 +110,8 @@
 
     <script>
         $(document).ready(function() {
-            // Aplica a função de formatação em todos os campos com a classe .money
-            $('.money').mask('000.000.000.000.000,00', {reverse: true});
+            // Máscara para Real Brasileiro: 1.234,56
+            $('.money').mask('#.##0,00', {reverse: true});
 
             // Aplica a função de formatação em todos os campos com a classe .data
             $('.data').mask('00/00/0000');
