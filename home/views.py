@@ -47,7 +47,7 @@ def categoria(request):
 
 @login_required
 def form_categoria(request):
-    """Gere o formulário de criação de nova categoria."""
+    """Gera o formulário de criação de nova categoria."""
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
         if form.is_valid():
@@ -101,7 +101,7 @@ def produto(request):
 
 @login_required
 def form_produto(request):
-    """Gere o cadastro de novos produtos."""
+    """Gera o cadastro de novos produtos."""
     if request.method == 'POST':
         form = ProdutoForm(request.POST)
         if form.is_valid():
@@ -145,7 +145,7 @@ def excluir_produto(request, id):
 
 @login_required
 def ajustar_estoque(request, id):
-    """Gere o ajuste manual da quantidade em estoque."""
+    """Gera o ajuste manual da quantidade em estoque."""
     produto = get_object_or_404(Produto, pk=id)
     estoque = produto.estoque 
     if request.method == 'POST':
@@ -235,7 +235,7 @@ def novo_pedido(request, id):
 
 @login_required
 def detalhes_pedido(request, id):
-    """Gere a adição de itens e visualização do pedido."""
+    """Gera a adição de itens e visualização do pedido."""
     pedido = get_object_or_404(Pedido, pk=id)
     if request.method == 'POST':
         form = ItemPedidoForm(request.POST)
@@ -315,22 +315,26 @@ def excluir_pedido(request, id):
 
 @login_required
 def form_pagamento(request, id):
-    """Gere o registro de pagamentos do pedido."""
+    """Gera o registro de pagamentos do pedido."""
     pedido = get_object_or_404(Pedido, pk=id)
     if request.method == 'POST':
         form = PagamentoForm(request.POST)
         if form.is_valid():
             pagamento = form.save(commit=False)
             pagamento.pedido = pedido
-            # Regra: não pagar mais do que o débito restante
-            if float(pagamento.valor) > float(pedido.debito):
+            
+            # CORREÇÃO: Usando objetos Decimal consistentes para comparação 
+            # (evita o TypeError e garante precisão financeira)
+            if pagamento.valor > pedido.debito:
                 messages.error(request, f"Valor superior ao débito de R$ {pedido.debito}")
             else:
                 pagamento.save()
                 messages.success(request, 'Pagamento registrado!')
                 return redirect('form_pagamento', id=id)
     else:
-        form = PagamentoForm(initial={'pedido': pedido})
+        # Sugere o valor do débito restante no formulário inicial
+        form = PagamentoForm(initial={'pedido': pedido, 'valor': pedido.debito})
+        
     return render(request, 'pedido/pagamento.html', {'pedido': pedido, 'form': form})
 
 @login_required

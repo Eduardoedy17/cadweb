@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 import random
 
 class Categoria(models.Model):
@@ -72,44 +73,57 @@ class Pedido(models.Model):
 
     @property
     def total(self):
-        return sum(item.qtde * item.preco for item in self.itempedido_set.all())
+        # Soma inicializada com Decimal para evitar conflitos de tipo
+        return sum((item.qtde * item.preco for item in self.itempedido_set.all()), Decimal('0.00'))
 
     @property
     def qtdeItens(self):
         return self.itempedido_set.count()
 
-    # --- PROPRIEDADES DE PAGAMENTO (Slide 19) ---
+    # --- PROPRIEDADES DE PAGAMENTO ---
     @property
     def pagamentos(self):
         return Pagamento.objects.filter(pedido=self)
 
     @property
     def total_pago(self):
-        return sum(pgto.valor for pgto in self.pagamentos)
+        return sum((pgto.valor for pgto in self.pagamentos), Decimal('0.00'))
 
     @property
     def debito(self):
         return self.total - self.total_pago
 
-    # --- DESAFIO: IMPOSTOS E CHAVE DE ACESSO ---
+    # --- DESAFIO: IMPOSTOS (CORRIGIDOS PARA DECIMAL) ---
     @property
-    def icms(self): return self.total * 0.18
+    def icms(self): 
+        return (self.total * Decimal('0.18')).quantize(Decimal('0.01'))
+    
     @property
-    def ipi(self): return self.total * 0.04
+    def ipi(self): 
+        return (self.total * Decimal('0.04')).quantize(Decimal('0.01'))
+    
     @property
-    def pis(self): return self.total * 0.0165
+    def pis(self): 
+        return (self.total * Decimal('0.0165')).quantize(Decimal('0.01'))
+    
     @property
-    def cofins(self): return self.total * 0.076
+    def cofins(self): 
+        return (self.total * Decimal('0.076')).quantize(Decimal('0.01'))
     
     @property
     def total_impostos(self):
         return self.icms + self.ipi + self.pis + self.cofins
 
     @property
+    def valor_final_nota(self):
+        return self.total + self.total_impostos
+
+    @property
     def chave_acesso(self):
         random.seed(self.id)
         aleatorio = random.randint(100000, 999999)
-        return f"{self.data_pedido.strftime('%Y%m%d')}{self.id:06d}{aleatorio}"
+        # Formatação padrão de 44 dígitos para simular NF-e
+        return f"{self.data_pedido.strftime('%Y%m%d')}{self.id:06d}{aleatorio}300156134409126"
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)

@@ -1,14 +1,14 @@
 from django import forms
-from datetime import date
 from .models import *
+from decimal import Decimal
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
         fields = ['nome', 'ordem']
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
-            'ordem': forms.NumberInput(attrs={'class': 'inteiro form-control', 'placeholder': ''}),
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'ordem': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
 class ClienteForm(forms.ModelForm):
@@ -16,11 +16,11 @@ class ClienteForm(forms.ModelForm):
         model = Cliente
         fields = ['nome', 'cpf', 'datanasc', 'telefone', 'email']
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome Completo'}),
-            'cpf': forms.TextInput(attrs={'class': 'cpf form-control', 'placeholder': '000.000.000-00'}),
-            'datanasc': forms.DateInput(attrs={'class': 'data form-control', 'placeholder': 'dd/mm/aaaa'}),
-            'telefone': forms.TextInput(attrs={'class': 'telefone form-control', 'placeholder': '(00) 00000-0000'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'cpf': forms.TextInput(attrs={'class': 'form-control', 'data-mask': '000.000.000-00'}),
+            'datanasc': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'telefone': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
 class ProdutoForm(forms.ModelForm):
@@ -28,36 +28,29 @@ class ProdutoForm(forms.ModelForm):
         model = Produto
         fields = ['nome', 'preco', 'categoria', 'img_base64']
         widgets = {
-            'categoria': forms.HiddenInput(), 
-            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do Produto'}),
-            'preco': forms.TextInput(attrs={'class': 'money form-control', 'maxlength': '500', 'placeholder': '0.000,00'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'preco': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
             'img_base64': forms.HiddenInput(),
-        }
-
-class EstoqueForm(forms.ModelForm):
-    class Meta:
-        model = Estoque
-        fields = ['produto', 'qtde']
-        widgets = {
-            'produto': forms.HiddenInput(),
-            'qtde': forms.TextInput(attrs={'class': 'inteiro form-control'}),
         }
 
 class PedidoForm(forms.ModelForm):
     class Meta:
         model = Pedido
-        fields = ['cliente']
+        fields = ['cliente', 'status']
         widgets = {
-            'cliente': forms.HiddenInput(),
+            'cliente': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
 class ItemPedidoForm(forms.ModelForm):
-    class Meta:
+    class Meta:        
         model = ItemPedido
-        fields = ['produto', 'qtde']
+        fields = ['produto', 'qtde', 'preco']
         widgets = {
             'produto': forms.Select(attrs={'class': 'form-control'}),
-            'qtde': forms.TextInput(attrs={'class': 'inteiro form-control', 'placeholder': 'Qtde'}),
+            'qtde': forms.NumberInput(attrs={'class': 'form-control'}),
+            'preco': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
 
 class PagamentoForm(forms.ModelForm):
@@ -71,13 +64,14 @@ class PagamentoForm(forms.ModelForm):
         }
 
     def clean_valor(self):
-        valor_str = self.cleaned_data.get('valor')
+        valor_raw = self.cleaned_data.get('valor')
         try:
-            valor_limpo = valor_str.replace('.', '').replace(',', '.')
-            valor = float(valor_limpo)
-        except:
-            valor = 0
-            
-        if valor <= 0:
+            # Remove ponto de milhar e substitui vírgula decimal por ponto
+            valor_limpo = str(valor_raw).replace('.', '').replace(',', '.')
+            valor_decimal = Decimal(valor_limpo)
+        except (ValueError, TypeError, Exception):
+            raise forms.ValidationError("Informe um número válido.")
+
+        if valor_decimal <= 0:
             raise forms.ValidationError("O valor deve ser maior que zero.")
-        return valor
+        return valor_decimal

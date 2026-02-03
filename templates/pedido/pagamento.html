@@ -1,44 +1,64 @@
 {% extends "base.html" %}
-
-{% block titulo_conteudo %} Registro de Pagamento {% endblock %}
-
 {% block conteudo %}
-<div class="card mb-3 p-3 bg-light">
-    <div class="row">
-        <div class="col-md-4"><strong>Cliente:</strong> {{ pedido.cliente.nome }}</div>
-        <div class="col-md-4"><strong>Total:</strong> R$ {{ pedido.total }}</div>
-        <div class="col-md-4 text-danger"><strong>Débito Restante:</strong> R$ {{ pedido.debito }}</div>
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Registro de Pagamento - Pedido #{{ pedido.id }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-md-4"><strong>Cliente:</strong> {{ pedido.cliente.nome }}</div>
+                <div class="col-md-4 text-center"><strong>Total:</strong> R$ {{ pedido.total|floatformat:2 }}</div>
+                <div class="col-md-4 text-end">
+                    <strong class="text-danger">Débito Restante: R$ {{ pedido.debito|floatformat:2 }}</strong>
+                </div>
+            </div>
+
+            <form method="post" class="mb-5">
+                {% csrf_token %}
+                {{ form.pedido }}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Forma de Pagamento:</label>
+                        {{ form.forma }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Valor:</label>
+                        {{ form.valor }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">Salvar Pagamento</button>
+                <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">Voltar</a>
+            </form>
+
+            <h5>Pagamentos Realizados</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Forma</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pg in pedido.pagamento_set.all %}
+                    <tr>
+                        <td>{{ pg.data_pgto|date:"d/m/Y H:i" }}</td>
+                        <td>{{ pg.get_forma_display }}</td>
+                        <td class="text-end">R$ {{ pg.valor|floatformat:2 }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'remover_pagamento' pg.id %}" class="text-danger" onclick="return confirm('Excluir este pagamento?')">Excluir</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">Nenhum pagamento registrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-
-<div class="card p-3 mb-3">
-    <h5>Cadastrar Pagamento</h5>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Salvar Pagamento</button>
-        <a href="{% url 'detalhes_pedido' pedido.id %}" class="btn btn-secondary">Voltar</a>
-    </form>
-</div>
-
-<h5>Pagamentos Realizados</h5>
-<table class="table table-striped table-hover">
-    <thead>
-        <tr><th>Data</th><th>Forma</th><th>Valor</th><th>Ação</th></tr>
-    </thead>
-    <tbody>
-        {% for p in pedido.pagamentos %}
-        <tr>
-            <td>{{ p.data_pgtof }}</td>
-            <td>{{ p.get_forma_display }}</td>
-            <td>R$ {{ p.valor }}</td>
-            <td>
-                <a href="{% url 'excluir_pagamento' p.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Excluir?')">Remover</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" class="text-center">Nenhum pagamento registrado.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock %}
