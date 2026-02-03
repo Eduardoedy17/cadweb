@@ -74,7 +74,7 @@ class PedidoForm(forms.ModelForm):
             'cliente': forms.HiddenInput(),
         }
 
-# --- NOVO FORM (Slide 17) ---
+
 class ItemPedidoForm(forms.ModelForm):
     class Meta:
         model = ItemPedido
@@ -83,3 +83,24 @@ class ItemPedidoForm(forms.ModelForm):
             'produto': forms.Select(attrs={'class': 'form-control'}),
             'qtde': forms.TextInput(attrs={'class': 'inteiro form-control', 'placeholder': 'Qtde'}),
         }
+
+class PagamentoForm(forms.ModelForm):
+    class Meta:
+        model = Pagamento
+        fields = ['pedido', 'forma', 'valor']
+        widgets = {
+            'pedido': forms.HiddenInput(),
+            'forma': forms.Select(attrs={'class': 'form-control'}),
+            'valor': forms.TextInput(attrs={'class': 'money form-control', 'placeholder': '0.000,00'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(PagamentoForm, self).__init__(*args, **kwargs)
+        self.fields['valor'].localize = True
+        self.fields['valor'].widget.is_localized = True
+
+    def clean_valor(self):
+        valor = self.cleaned_data.get('valor')
+        if valor is not None and valor <= 0:
+            raise forms.ValidationError("O valor deve ser maior que zero.") [cite: 25]
+        return valor

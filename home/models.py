@@ -44,8 +44,6 @@ class Estoque(models.Model):
     def __str__(self):
         return f'{self.produto.nome} - Quantidade: {self.qtde}'
 
-# --- MODELOS DO PEDIDO ---
-
 class Pedido(models.Model):
     NOVO = 1
     EM_ANDAMENTO = 2
@@ -65,24 +63,52 @@ class Pedido(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=NOVO)
 
     def __str__(self):
-        return f"Pedido {self.id} - Cliente: {self.cliente.nome} - Status: {self.get_status_display()}"
+        return f"Pedido {self.id} - Cliente: {self.cliente.nome}"
 
     @property
     def data_pedidof(self):
-        if self.data_pedido:
-            return self.data_pedido.strftime('%d/%m/%Y %H:%M')
-        return None 
+        return self.data_pedido.strftime('%d/%m/%Y %H:%M') if self.data_pedido else None 
 
     @property
     def total(self):
-        # Calcula o total de todos os itens no pedido (Slide 69/70)
-        total = sum(item.qtde * item.preco for item in self.itempedido_set.all())
-        return total
+        return sum(item.qtde * item.preco for item in self.itempedido_set.all())
 
     @property
     def qtdeItens(self):
-        # Conta a qtde de itens no pedido (Slide 69/70)
         return self.itempedido_set.count()
+
+    # --- NOVAS PROPRIEDADES (Slide 19, 48, 65) ---
+    @property
+    def pagamentos(self):
+        return Pagamento.objects.filter(pedido=self)
+
+    @property
+    def total_pago(self):
+        return sum(pgto.valor for pgto in self.pagamentos)
+
+    @property
+    def debito(self):
+        return self.total - self.total_pago
+
+    # Desafio Impostos (Slide 67-72)
+    @property
+    def icms(self): return self.total * 0.18
+    @property
+    def ipi(self): return self.total * 0.04
+    @property
+    def pis(self): return self.total * 0.0165
+    @property
+    def cofins(self): return self.total * 0.076
+    @property
+    def total_impostos(self):
+        return self.icms + self.ipi + self.pis + self.cofins
+
+    @property
+    def chave_acesso(self):
+        import random
+        random.seed(self.id) # Para manter a mesma chave para o mesmo ID
+        aleatorio = random.randint(100000, 999999)
+        return f"{self.data_pedido.strftime('%Y%m%d')}{self.id:06d}{aleatorio}"
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
@@ -90,10 +116,23 @@ class ItemPedido(models.Model):
     qtde = models.PositiveIntegerField()
     preco = models.DecimalField(max_digits=10, decimal_places=2)
 
-    def __str__(self):
-        return f"{self.produto.nome} (Qtd: {self.qtde}) - Preço Unitário: {self.preco}"
-
     @property
     def total(self):
-        # Calcula o total do item (Slide 76)
         return self.qtde * self.preco
+
+class Pagamento(models.Model):
+    DINHEIRO = 1
+    CARTAO = 2
+    PIX = 3
+    OUTRA = 4
+
+    FORMA_CHOICES = [(DINHEIRO, 'Dinheiro'), (CARTAO, 'Cartão'), (PIX, 'Pix'), (OUTRA, 'Outra')]
+
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
+    forma = models.IntegerField(choices=FORMA_CHOICES)
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    data_pgto = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def data_pgtof(self):
+        return self.data_pgto.strftime('%d/%m/%Y %H:%M')

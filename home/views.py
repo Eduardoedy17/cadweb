@@ -318,3 +318,43 @@ def remover_item_pedido(request, id):
     item.delete()
     messages.success(request, 'Item removido e estoque restaurado!')
     return redirect('detalhes_pedido', id=pedido_id)
+
+
+@login_required
+def form_pagamento(request, id):
+    pedido = get_object_or_404(Pedido, pk=id)
+    
+    if request.method == 'POST':
+        form = PagamentoForm(request.POST)
+        if form.is_valid():
+            pagamento = form.save(commit=False)
+            # Validação: Slide 53 (Não permitir pagar mais que o débito)
+            if pagamento.valor > pedido.debito:
+                messages.error(request, f'Erro: O valor informado (R$ {pagamento.valor}) é superior ao débito (R$ {pedido.debito}).')
+            else:
+                pagamento.save()
+                messages.success(request, 'Pagamento registrado com sucesso!')
+            return redirect('form_pagamento', id=id)
+    else:
+        
+        pagamento = Pagamento(pedido=pedido)
+        form = PagamentoForm(instance=pagamento)
+    
+    contexto = {
+        'pedido': pedido,
+        'form': form,
+    }
+    return render(request, 'pedido/pagamento.html', contexto)
+
+@login_required
+def nota_fiscal(request, id):
+    pedido = get_object_or_404(Pedido, pk=id)
+    return render(request, 'pedido/nota_fiscal.html', {'pedido': pedido})
+
+@login_required
+def excluir_pagamento(request, id):
+    pagamento = get_object_or_404(Pagamento, pk=id)
+    pedido_id = pagamento.pedido.id
+    pagamento.delete()
+    messages.success(request, 'Pagamento removido!')
+    return redirect('form_pagamento', id=pedido_id)

@@ -37,7 +37,12 @@ urlpatterns = [
     path('pedido/detalhes/<int:id>', views.detalhes_pedido, name='detalhes_pedido'),
     path('pedido/excluir/<int:id>', views.excluir_pedido, name='excluir_pedido'),
     
-    # NOVAS ROTAS PARA ITENS (Slide 83)
+    # --- ITENS PEDIDO ---
     path('pedido/remover_item/<int:id>', views.remover_item_pedido, name='remover_item_pedido'),
     path('pedido/editar_item/<int:id>', views.editar_item_pedido, name='editar_item_pedido'),
+
+    # --- PAGAMENTOS E NOTA FISCAL ---
+    path('pedido/pagamento/<int:id>/', views.form_pagamento, name='form_pagamento'),
+    path('pedido/excluir_pagamento/<int:id>/', views.excluir_pagamento, name='excluir_pagamento'),
+    path('pedido/nota_fiscal/<int:id>/', views.nota_fiscal, name='nota_fiscal'),
 ]
